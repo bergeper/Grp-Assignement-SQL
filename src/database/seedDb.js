@@ -10,7 +10,6 @@ const snowsportsDb = async () => {
     // Create stores table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS stores (
-      id INTEGER NOT NULL,
       store_name TEXT NOT NULL,
       store_zipcode INTEGER NOT NULL,
       store_owner INTEGER NOT NULL,
@@ -31,7 +30,7 @@ const snowsportsDb = async () => {
     `);
 
     let storeInsertQuery =
-      "INSERT INTO store (id, store_name, store_zipcode, store_owner, store_city, fk_review_id) VALUES ";
+      "INSERT INTO stores (store_name, store_zipcode, store_owner, store_city, fk_review_id) VALUES ";
 
     let storeInsertQueryVariables = [];
 
@@ -45,7 +44,6 @@ const snowsportsDb = async () => {
       if (index < array.length - 1) storeInsertQuery += ",";
 
       const variables = [
-        store.id,
         store.store_name, 
         store.store_zipcode,
         store.store_owner, 
@@ -64,9 +62,9 @@ const snowsportsDb = async () => {
     });
 
     const [storesRes, metadata] = await sequelize.query(
-      "SELECT store_name, id FROM store"
+      "SELECT store_name FROM stores"
     );
-    
+
 /****************************************/
 
     let firstLadyInsertQuery =
