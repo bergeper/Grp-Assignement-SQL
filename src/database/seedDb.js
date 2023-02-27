@@ -1,12 +1,46 @@
 const { sequelize } = require("./config");
 const { stores } = require("../data/stores");
+const { users } = require("../data/users");
+const { admins } = require("../data/admins");
+const { reviews } = require("../data/reviews");
 
 const snowsportsDb = async () => {
   try {
     // Drop tables if exist
-    await sequelize.query(`DROP TABLE IF EXISTS stores;`);
+    await sequelize.query(`DROP TABLE IF EXISTS reviews;`);
     await sequelize.query(`DROP TABLE IF EXISTS users;`);
+    await sequelize.query(`DROP TABLE IF EXISTS stores;`);
+    await sequelize.query(`DROP TABLE IF EXISTS admins`);
 
+    // Create users table
+    await sequelize.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL,
+      password TEXT NOT NULL,
+      email TEXT NOT NULL
+    );
+    `);
+
+    await sequelize.query(`
+    CREATE TABLE IF NOT EXISTS admins (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      password TEXT NOT NULL
+    );
+    `);
+
+    // Create users table
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        review_title TEXT NOT NULL,
+        review_description TEXT NOT NULL,
+        review_rating INTEGER NOT NULL,
+        fk_user_id INTEGER NOT NULL,
+        FOREIGN KEY(fk_user_id) REFERENCES users(id)
+        );
+        `);
     // Create stores table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS stores (
@@ -15,31 +49,137 @@ const snowsportsDb = async () => {
       store_zipcode INTEGER NOT NULL,
       store_owner INTEGER NOT NULL,
       store_city TEXT NOT NULL,
-      fk_review_id INTEGER NOT NULL,
+      fk_review_id INTEGER NOT NULL
       );
       `);
 
-    // Create users table
-    await sequelize.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      full_name TEXT NOT NULL,
-      password TEXT NOT NULL,
-      email TEXT NOT NULL,
-      created_at TIMESTAMP,
+    // FOREIGN KEY(fk_review_id) REFERENCES reviews(id)
+    /****************************************/
+
+    let userInsertQuery =
+      "INSERT INTO users (username, password, email) VALUES ";
+
+    let userInsertQueryVariables = [];
+
+    users.forEach((user, index, array) => {
+      let string = "(";
+      for (let i = 1; i < 4; i++) {
+        string += `$${userInsertQueryVariables.length + i}`;
+        if (i < 3) string += ",";
+      }
+      userInsertQuery += string + `)`;
+      if (index < array.length - 1) userInsertQuery += ",";
+      // prettier-ignore
+      const variables = [
+        user.username, 
+        user.password, 
+        user.email
+      ];
+      // prettier-ignore
+      userInsertQueryVariables = [
+        ...userInsertQueryVariables, 
+        ...variables
+      ];
+    });
+    userInsertQuery += `;`;
+
+    await sequelize.query(userInsertQuery, {
+      bind: userInsertQueryVariables,
+    });
+
+    const [usersRes, metadata] = await sequelize.query(
+      "SELECT username, id FROM users"
     );
-    `);
+
+    // **********************************************
+
+    let adminInsertQuery = "INSERT INTO admins (name, password) VALUES ";
+
+    let adminInsertQueryVariables = [];
+
+    admins.forEach((admin, index, array) => {
+      let string = "(";
+      for (let i = 1; i < 3; i++) {
+        string += `$${adminInsertQueryVariables.length + i}`;
+        if (i < 2) string += ",";
+      }
+      adminInsertQuery += string + `)`;
+      if (index < array.length - 1) adminInsertQuery += ",";
+      // prettier-ignore
+      const variables = [
+        admin.name, 
+        admin.password, 
+
+      ];
+      // prettier-ignore
+      adminInsertQueryVariables = [
+        ...adminInsertQueryVariables, 
+        ...variables
+      ];
+    });
+    adminInsertQuery += `;`;
+
+    await sequelize.query(adminInsertQuery, {
+      bind: adminInsertQueryVariables,
+    });
+
+    /**********************************************/
+
+    let reviewInsertQuery =
+      "INSERT INTO reviews (review_title, review_description, review_rating, fk_user_id, review_author) VALUES ";
+
+    let reviewInsertQueryVariables = [];
+
+    reviews.forEach((review, index, array) => {
+      let string = "(";
+      for (let i = 1; i < 5; i++) {
+        string += `$${reviewInsertQueryVariables.length + i}`;
+        if (i < 4) string += ",";
+      }
+      reviewInsertQuery += string + `)`;
+      if (index < array.length - 1) reviewInsertQuery += ",";
+      // prettier-ignore
+      const variables = [
+        review.review_title, 
+        review.review_description, 
+        review.review_rating,
+        review.fk_user_id,
+        review.review_author,
+        ];
+
+      review.fk_user_id
+        ? variables.push("Unkown-user")
+        : variables.push(review.fk_user_id);
+      const userId = usersRes.find(
+        (user) => user.username === review.review_author
+      );
+      console.log(userId);
+      variables.push(userId.id);
+
+      // prettier-ignore
+      reviewInsertQueryVariables = [
+          ...reviewInsertQueryVariables, 
+          ...variables
+      ];
+    });
+    reviewInsertQuery += `;`;
+
+    await sequelize.query(reviewInsertQuery, {
+      bind: reviewInsertQueryVariables,
+    });
+
+    /**********************************************/
 
     let storeInsertQuery =
-      "INSERT INTO stores (id, store_name, store_zipcode, store_owner, store_city, fk_review_id) VALUES ";
+      "INSERT INTO stores (store_name, store_zipcode, store_owner, store_city, fk_review_id) VALUES ";
 
     let storeInsertQueryVariables = [];
 
     stores.forEach((store, index, array) => {
       let string = "(";
-      for (let i = 1; i < 10; i++) {
+      for (let i = 1; i < 6; i++) {
         string += `$${storeInsertQueryVariables.length + i}`;
-        if (i < 9) string += ",";
+        if (i < 5) string += ",";
       }
       storeInsertQuery += string + ")";
       if (index < array.length - 1) storeInsertQuery += ",";
@@ -54,103 +194,15 @@ const snowsportsDb = async () => {
       storeInsertQueryVariables = [...storeInsertQueryVariables, ...variables];
     });
     storeInsertQuery += ";";
-
+    /*
+    const userId = usersRes.find((u) => u.name === .president);
+    variables.push(presidentId.id);
+    */
     await sequelize.query(storeInsertQuery, {
       bind: storeInsertQueryVariables,
     });
 
-    const [storesRes, metadata] = await sequelize.query(
-      "SELECT store_name, id FROM stores"
-    );
-
-    /****************************************/
-
-    let userInsertQuery =
-      "INSERT INTO first_lady (name, birth_year, death_year, tenure_start, tenure_end, age_at_tenure_start, birth_country, wife_of_president, relationship_with_president, fk_president_id) VALUES ";
-
-    let userInsertQueryVariables = [];
-
-    firstLadies.forEach((user, index, array) => {
-      let string = "(";
-      for (let i = 1; i < 11; i++) {
-        string += `$${userInsertQueryVariables.length + i}`;
-        if (i < 10) string += ",";
-      }
-      userInsertQuery += string + `)`;
-      if (index < array.length - 1) userInsertQuery += ",";
-      const variables = [
-        user.name,
-        user.birthYear,
-        user.deathYear,
-        user.tenureStart,
-        user.tenureEnd,
-        user.ageAtStartOfTenure,
-        user.birthCountry,
-        user.wifeOfPresident,
-      ];
-
-      const presidentId = presidentsRes.find(
-        (pres) => pres.name === user.president
-      );
-      variables.push(presidentId.id);
-
-      userInsertQueryVariables = [...userInsertQueryVariables, ...variables];
-    });
-    userInsertQuery += `;`;
-
-    await sequelize.query(userInsertQuery, {
-      bind: userInsertQueryVariables,
-    });
-
-    let petInsertQuery =
-      "INSERT INTO pet (name, species, mammal, breed, birth_date, death_date, age, fk_president_id) VALUES ";
-
-    let petInsertQueryVariables = [];
-
-    let petsArray = [];
-    pets.forEach((petsObj) => {
-      petsObj.pets.forEach((pet) => {
-        petsArray.push({
-          ...pet,
-          president: petsObj.president,
-        });
-      });
-      return pets;
-    });
-
-    petsArray.forEach((pet, index, array) => {
-      let string = "(";
-      for (let i = 1; i < 9; i++) {
-        string += `$${petInsertQueryVariables.length + i}`;
-        if (i < 8) string += ",";
-      }
-      petInsertQuery += string + `)`;
-      if (index < array.length - 1) petInsertQuery += ",";
-      // prettier-ignore
-      const variables = [
-        pet.name, 
-        pet.species, 
-        pet.mammal
-      ]
-
-      variables.push(pet.breed || null);
-      variables.push(pet.birthDate || null);
-      variables.push(pet.deathDate || null);
-      variables.push(pet.age || null);
-
-      const presidentId = presidentsRes.find(
-        (pres) => pres.name === pet.president
-      );
-      variables.push(presidentId.id);
-
-      petInsertQueryVariables = [...petInsertQueryVariables, ...variables];
-    });
-    petInsertQuery += `;`;
-
-    await sequelize.query(petInsertQuery, {
-      bind: petInsertQueryVariables,
-    });
-
+    console.log(usersRes);
     console.log("Database successfully populated with data...");
   } catch (error) {
     // Log eny eventual errors to Terminal
