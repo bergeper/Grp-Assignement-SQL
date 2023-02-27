@@ -10,18 +10,19 @@ const snowsportsDb = async () => {
     // Create stores table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS stores (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       store_name TEXT NOT NULL,
       store_zipcode INTEGER NOT NULL,
       store_owner INTEGER NOT NULL,
       store_city TEXT NOT NULL,
       fk_review_id INTEGER NOT NULL,
       );
-      `)
+      `);
 
     // Create users table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS users (
-      id INTEGER NOT NULL,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       full_name TEXT NOT NULL,
       password TEXT NOT NULL,
       email TEXT NOT NULL,
@@ -30,7 +31,7 @@ const snowsportsDb = async () => {
     `);
 
     let storeInsertQuery =
-      "INSERT INTO stores (store_name, store_zipcode, store_owner, store_city, fk_review_id) VALUES ";
+      "INSERT INTO stores (id, store_name, store_zipcode, store_owner, store_city, fk_review_id) VALUES ";
 
     let storeInsertQueryVariables = [];
 
@@ -44,16 +45,13 @@ const snowsportsDb = async () => {
       if (index < array.length - 1) storeInsertQuery += ",";
 
       const variables = [
-        store.store_name, 
+        store.store_name,
         store.store_zipcode,
-        store.store_owner, 
+        store.store_owner,
         store.store_city,
-        store.fk_review_id
+        store.fk_review_id,
       ];
-      storeInsertQueryVariables = [
-        ...storeInsertQueryVariables,
-        ...variables,
-      ];
+      storeInsertQueryVariables = [...storeInsertQueryVariables, ...variables];
     });
     storeInsertQuery += ";";
 
@@ -62,53 +60,46 @@ const snowsportsDb = async () => {
     });
 
     const [storesRes, metadata] = await sequelize.query(
-      "SELECT store_name FROM stores"
+      "SELECT store_name, id FROM stores"
     );
 
-/****************************************/
+    /****************************************/
 
-    let firstLadyInsertQuery =
+    let userInsertQuery =
       "INSERT INTO first_lady (name, birth_year, death_year, tenure_start, tenure_end, age_at_tenure_start, birth_country, wife_of_president, relationship_with_president, fk_president_id) VALUES ";
 
-    let firstLadyInsertQueryVariables = [];
+    let userInsertQueryVariables = [];
 
-    firstLadies.forEach((firstLady, index, array) => {
+    firstLadies.forEach((user, index, array) => {
       let string = "(";
       for (let i = 1; i < 11; i++) {
-        string += `$${firstLadyInsertQueryVariables.length + i}`;
+        string += `$${userInsertQueryVariables.length + i}`;
         if (i < 10) string += ",";
       }
-      firstLadyInsertQuery += string + `)`;
-      if (index < array.length - 1) firstLadyInsertQuery += ",";
+      userInsertQuery += string + `)`;
+      if (index < array.length - 1) userInsertQuery += ",";
       const variables = [
-        firstLady.name,
-        firstLady.birthYear,
-        firstLady.deathYear,
-        firstLady.tenureStart,
-        firstLady.tenureEnd,
-        firstLady.ageAtStartOfTenure,
-        firstLady.birthCountry,
-        firstLady.wifeOfPresident,
+        user.name,
+        user.birthYear,
+        user.deathYear,
+        user.tenureStart,
+        user.tenureEnd,
+        user.ageAtStartOfTenure,
+        user.birthCountry,
+        user.wifeOfPresident,
       ];
 
-      firstLady.wifeOfPresident
-        ? variables.push("Spouse")
-        : variables.push(firstLady.relationshipWithPresident);
-
       const presidentId = presidentsRes.find(
-        (pres) => pres.name === firstLady.president
+        (pres) => pres.name === user.president
       );
       variables.push(presidentId.id);
 
-      firstLadyInsertQueryVariables = [
-        ...firstLadyInsertQueryVariables,
-        ...variables,
-      ];
+      userInsertQueryVariables = [...userInsertQueryVariables, ...variables];
     });
-    firstLadyInsertQuery += `;`;
+    userInsertQuery += `;`;
 
-    await sequelize.query(firstLadyInsertQuery, {
-      bind: firstLadyInsertQueryVariables,
+    await sequelize.query(userInsertQuery, {
+      bind: userInsertQueryVariables,
     });
 
     let petInsertQuery =
