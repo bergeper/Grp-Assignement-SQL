@@ -1,7 +1,5 @@
 const { sequelize } = require("./config");
-const { presidents } = require("../data/presidents");
-const { pets } = require("../data/pets");
-const { firstLadies } = require("../data/firstLadies");
+const { stores } = require("../data/stores");
 
 const snowsportsDb = async () => {
   try {
@@ -12,76 +10,64 @@ const snowsportsDb = async () => {
     // Create stores table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS stores (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      number INTEGER NOT NULL,
-      birth_year INTEGER NOT NULL,
-      death_year INTEGER,
-      took_office DATE NOT NULL,
-      left_office DATE,
-      party TEXT,
-      days_in_office INTEGER NOT NULL DEFAULT 0,
-      sat_two_full_terms BOOLEAN CHECK (sat_two_full_terms IN (0, 1))
-    );
-   `);
+      id INTEGER NOT NULL,
+      store_name TEXT NOT NULL,
+      store_zipcode INTEGER NOT NULL,
+      store_owner INTEGER NOT NULL,
+      store_city TEXT NOT NULL,
+      fk_review_id INTEGER NOT NULL,
+      );
+      `)
 
     // Create users table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      birth_year INTEGER NOT NULL,
-      death_year INTEGER,
-      tenure_start DATE,
-      tenure_end DATE,
-      age_at_tenure_start INTEGER NOT NULL,
-      birth_country TEXT,
-      wife_of_president BOOLEAN DEFAULT 1 CHECK (wife_of_president IN (0, 1)),
-      relationship_with_president TEXT,
-      fk_president_id INTEGER NOT NULL,
-      FOREIGN KEY(fk_president_id) REFERENCES president(id)
+      id INTEGER NOT NULL,
+      full_name TEXT NOT NULL,
+      password TEXT NOT NULL,
+      email TEXT NOT NULL,
+      created_at TIMESTAMP,
     );
     `);
 
-    let presidentInsertQuery =
-      "INSERT INTO president (number, name, birth_year, death_year, took_office, left_office, party, days_in_office, sat_two_full_terms) VALUES ";
+    let storeInsertQuery =
+      "INSERT INTO store (id, store_name, store_zipcode, store_owner, store_city, fk_review_id) VALUES ";
 
-    let presidentInsertQueryVariables = [];
+    let storeInsertQueryVariables = [];
 
-    presidents.forEach((president, index, array) => {
+    stores.forEach((store, index, array) => {
       let string = "(";
       for (let i = 1; i < 10; i++) {
-        string += `$${presidentInsertQueryVariables.length + i}`;
+        string += `$${storeInsertQueryVariables.length + i}`;
         if (i < 9) string += ",";
       }
-      presidentInsertQuery += string + ")";
-      if (index < array.length - 1) presidentInsertQuery += ",";
+      storeInsertQuery += string + ")";
+      if (index < array.length - 1) storeInsertQuery += ",";
 
       const variables = [
-        president.number,
-        president.name,
-        president.birth_year,
-        president.death_year,
-        president.took_office,
-        president.left_office,
-        president.party,
-        president.days_in_office,
-        president.sat_two_full_terms,
+        store.id,
+        store.store_name, 
+        store.store_zipcode,
+        store.store_owner, 
+        store.store_city,
+        store.fk_review_id
       ];
-      presidentInsertQueryVariables = [
-        ...presidentInsertQueryVariables,
+      storeInsertQueryVariables = [
+        ...storeInsertQueryVariables,
         ...variables,
       ];
     });
-    presidentInsertQuery += ";";
+    storeInsertQuery += ";";
 
-    await sequelize.query(presidentInsertQuery, {
-      bind: presidentInsertQueryVariables,
+    await sequelize.query(storeInsertQuery, {
+      bind: storeInsertQueryVariables,
     });
 
-    const [presidentsRes, metadata] = await sequelize.query(
-      "SELECT name, id FROM president"
+    const [storesRes, metadata] = await sequelize.query(
+      "SELECT store_name, id FROM store"
     );
+    
+/****************************************/
 
     let firstLadyInsertQuery =
       "INSERT INTO first_lady (name, birth_year, death_year, tenure_start, tenure_end, age_at_tenure_start, birth_country, wife_of_president, relationship_with_president, fk_president_id) VALUES ";
