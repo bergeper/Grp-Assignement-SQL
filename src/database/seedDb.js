@@ -16,7 +16,7 @@ const snowsportsDb = async () => {
     // Create users table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL,
       password TEXT NOT NULL,
       email TEXT NOT NULL
@@ -25,7 +25,7 @@ const snowsportsDb = async () => {
 
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS admins (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      admin_id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       password TEXT NOT NULL
     );
@@ -34,25 +34,25 @@ const snowsportsDb = async () => {
     // Create users table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS reviews (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      review_id INTEGER PRIMARY KEY AUTOINCREMENT,
       review_title TEXT NOT NULL,
       review_description TEXT NOT NULL,
       review_rating INTEGER NOT NULL,
       fk_user_id INTEGER NOT NULL,
-      FOREIGN KEY(fk_user_id) REFERENCES users(id)
+      FOREIGN KEY(fk_user_id) REFERENCES users(user_id)
       );
       `);
     // Create stores table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS stores (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      store_id INTEGER PRIMARY KEY AUTOINCREMENT,
       store_name TEXT NOT NULL,
       store_description TEXT NOT NULL,
       store_zipcode INTEGER NOT NULL,
       store_owner INTEGER NOT NULL,
       store_city TEXT NOT NULL,
       fk_review_id INTEGER,
-      FOREIGN KEY(fk_review_id) REFERENCES reviews(id)
+      FOREIGN KEY(fk_review_id) REFERENCES reviews(review_id)
       );
       `);
 
@@ -71,12 +71,13 @@ const snowsportsDb = async () => {
       }
       userInsertQuery += string + `)`;
       if (index < array.length - 1) userInsertQuery += ",";
-      // prettier-ignore
-      const salt = await bcrypt.genSalt(10)
-      const password = user.password;
-      let hashedpassword = await bcrypt.hash(password, salt);
 
-      const variables = [user.username, hashedpassword, user.email];
+      let password = user.password;
+      // prettier-ignore
+      //const salt = await bcrypt.genSalt(10)
+      //let hashedpassword = await bcrypt.hash(password, salt);
+
+      const variables = [user.username, password, user.email];
       // prettier-ignore
       userInsertQueryVariables = [
         ...userInsertQueryVariables, 
@@ -90,7 +91,7 @@ const snowsportsDb = async () => {
     });
 
     const [usersRes, metadata] = await sequelize.query(
-      "SELECT username, id FROM users"
+      "SELECT username, user_id FROM users"
     );
 
     // **********************************************
