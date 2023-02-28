@@ -18,7 +18,8 @@ const snowsportsDb = async () => {
       user_id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL,
       password TEXT NOT NULL,
-      email TEXT NOT NULL
+      email TEXT NOT NULL,
+      is_admin BOOLEAN NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1)) 
     );
     `);
 
@@ -50,46 +51,50 @@ const snowsportsDb = async () => {
       );
       `);
 
-    let userInsertQuery =
-      "INSERT INTO users (username, password, email) VALUES ";
+    const hashPw = async (password) => {
+      const salt = await bcrypt.genSalt(10);
+      const hashedpassword = await bcrypt.hash(password, salt);
+      return hashedpassword;
+    };
 
-    let userInsertQueryVariables = [];
+    let HashedPwOne = await hashPw(users[0].password);
+    let HashedPwTwo = await hashPw(users[1].password);
+    let HashedPwThree = await hashPw(users[2].password);
 
-    users.forEach((user, index, array) => {
-      let string = "(";
-      for (let i = 1; i < 4; i++) {
-        string += `$${userInsertQueryVariables.length + i}`;
-        if (i < 3) string += ",";
+    await sequelize.query(
+      "INSERT INTO users (username, email, password, is_admin) VALUES ($username, $email, $password, TRUE)",
+      {
+        bind: {
+          username: users[0].username,
+          email: users[0].email,
+          password: HashedPwOne,
+        },
       }
-      userInsertQuery += string + `)`;
-      if (index < array.length - 1) userInsertQuery += ",";
-
-      // let password = user.password;
-      // const salt = await bcrypt.genSalt(10);
-      // user.password = await bcrypt.hash(password, salt);
-      // prettier-ignore
-      const variables = [
-        user.username, 
-        user.password, 
-        user.email
-      ];
-      // prettier-ignore
-      userInsertQueryVariables = [
-        ...userInsertQueryVariables, 
-        ...variables
-      ];
-    });
-    userInsertQuery += `;`;
-
-    await sequelize.query(userInsertQuery, {
-      bind: userInsertQueryVariables,
-    });
-
-    const [usersRes, metadata] = await sequelize.query(
-      "SELECT username, user_id FROM users"
     );
 
-    /****************************************/
+    await sequelize.query(
+      "INSERT INTO users (username, email, password) VALUES ($username, $email, $password)",
+      {
+        bind: {
+          username: users[1].username,
+          email: users[1].email,
+          password: HashedPwTwo,
+        },
+      }
+    );
+
+    await sequelize.query(
+      "INSERT INTO users (username, email, password) VALUES ($username, $email, $password)",
+      {
+        bind: {
+          username: users[2].username,
+          email: users[2].email,
+          password: HashedPwThree,
+        },
+      }
+    );
+
+    const [usersRes, metadata] = await sequelize.query("SELECT * FROM users");
 
     let storeInsertQuery =
       "INSERT INTO stores (store_name, store_description, store_adress, store_zipcode, store_city, store_createdBy_fk_user_id) VALUES ";
@@ -119,8 +124,6 @@ const snowsportsDb = async () => {
     await sequelize.query(storeInsertQuery, {
       bind: storeInsertQueryVariables,
     });
-
-    /**********************************************/
 
     let reviewInsertQuery =
       "INSERT INTO reviews (review_title, review_description, review_rating, fk_user_id, fk_store_id) VALUES ";
@@ -154,8 +157,6 @@ const snowsportsDb = async () => {
     await sequelize.query(reviewInsertQuery, {
       bind: reviewInsertQueryVariables,
     });
-
-    /**********************************************/
 
     console.log(usersRes);
     console.log("Database successfully populated with data...");
