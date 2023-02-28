@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const { sequelize } = require("./config");
 const { stores } = require("../data/stores");
 const { users } = require("../data/users");
-
+const { citys } = require("../data/citys");
 const { reviews } = require("../data/reviews");
 
 const snowsportsDb = async () => {
@@ -23,6 +23,13 @@ const snowsportsDb = async () => {
     );
     `);
 
+    // Create city table
+    await sequelize.query(`
+    CREATE TABLE IF NOT EXISTS citys (
+      city_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      city_name TEXT NOT NULL
+    );`);
+
     // Create stores table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS stores (
@@ -31,13 +38,14 @@ const snowsportsDb = async () => {
       store_description TEXT NOT NULL,
       store_adress TEXT NOT NULL,
       store_zipcode INTEGER NOT NULL,
-      store_city TEXT NOT NULL,
+      store_fk_city_id INTEGER NOT NULL,
       store_createdBy_fk_user_id INTEGER NOT NULL,
+      FOREIGN KEY(store_fk_city_id) REFERENCES citys(city_id),
       FOREIGN KEY(store_createdBy_fk_user_id) REFERENCES users(user_id)
       );
       `);
 
-    // Create users table
+    // Create reviews table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS reviews (
       review_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,10 +102,32 @@ const snowsportsDb = async () => {
       }
     );
 
-    const [usersRes, metadata] = await sequelize.query("SELECT * FROM users");
+    //const [usersRes, metadata] = await sequelize.query("SELECT * FROM users");
 
+    let cityInsertQuery = "INSERT INTO citys (city_name) VALUES ";
+
+    let cityInsertQueryVariables = [];
+
+    citys.forEach((citys, index, array) => {
+      let string = "(";
+      for (let i = 1; i < 2; i++) {
+        string += `$${cityInsertQueryVariables.length + i}`;
+        if (i < 1) string += ",";
+      }
+      cityInsertQuery += string + ")";
+      if (index < array.length - 1) cityInsertQuery += ",";
+
+      const variables = [citys.city_name];
+      cityInsertQueryVariables = [...cityInsertQueryVariables, ...variables];
+    });
+    cityInsertQuery += ";";
+    await sequelize.query(cityInsertQuery, {
+      bind: cityInsertQueryVariables,
+    });
+
+    /*                         s                      */
     let storeInsertQuery =
-      "INSERT INTO stores (store_name, store_description, store_adress, store_zipcode, store_city, store_createdBy_fk_user_id) VALUES ";
+      "INSERT INTO stores (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id) VALUES ";
 
     let storeInsertQueryVariables = [];
 
@@ -115,7 +145,7 @@ const snowsportsDb = async () => {
         store.store_description,
         store.store_adress,
         store.store_zipcode,
-        store.store_city,
+        store.store_fk_city_id,
         store.store_createdBy_fk_user_id,
       ];
       storeInsertQueryVariables = [...storeInsertQueryVariables, ...variables];
@@ -158,7 +188,7 @@ const snowsportsDb = async () => {
       bind: reviewInsertQueryVariables,
     });
 
-    console.log(usersRes);
+    //console.log(usersRes);
     console.log("Database successfully populated with data...");
   } catch (error) {
     // Log eny eventual errors to Terminal

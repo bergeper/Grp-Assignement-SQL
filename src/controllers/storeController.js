@@ -26,9 +26,7 @@ exports.createNewStore = async (req, res) => {
     );
 
     if (!userRole) {
-      throw new UnauthorizedError(
-        "You are not allowed to perform this action"
-      );
+      throw new UnauthorizedError("You are not allowed to perform this action");
     }
   }
 
