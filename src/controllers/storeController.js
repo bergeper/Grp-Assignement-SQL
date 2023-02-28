@@ -1,5 +1,6 @@
 const { QueryTypes } = require("sequelize");
 const { userRoles } = require("../constants/users");
+const { user } = require("../data/users");
 const { sequelize } = require("../database/config");
 const { UnauthorizedError } = require("../utils/errors");
 
@@ -10,17 +11,21 @@ exports.getStoreById = (req, res) => {
 
 exports.createNewStore = async (req, res) => {
   const store = req.body.store;
-  const listId = req.params.listId || req.body.listId;
+  const userId = req.params.userId || req.body.userId;
+
+  // börja med login och registrering så blir det lättare. lägger till user ID på req.user. så kan man hämta datan därifrån sen.
 
   if (req.user.role !== userRoles.ADMIN) {
     const [userRole, userRoleMeta] = await sequelize.query(
       `
-      INSERT _STORE =
-      INSERT INTO stores (store_name, store_description, store_adress, store_zipcode, store_city, store_createdBy_fk_user_id)
-      VALUES (store_name, store_description, store_adress, store_zipcode, store_city, store_createdBy_fk_user_id)
-      `,
+      SELECT user 
+      FROM users
+        JOIN user ON store = ul.fk_roles_id 
+      WHERE userId = $userId AND store_createdBy_fk_user_id: = $userId 
+      LIMIT 1
+    `,
       {
-        bind: { listId: listId, userId: req.user.userId },
+        bind: { userId: req.user.userId },
         type: QueryTypes.SELECT,
       }
     );
@@ -31,7 +36,7 @@ exports.createNewStore = async (req, res) => {
   }
 
   const [newStoreId] = await sequelize.query(
-    "INSERT INTO getAllStores (store, fk_lists_id) VALUES ($store, $listId);",
+    "INSERT INTO stores (store, fk_lists_id) VALUES (store_name, store_description, store_adress, store_zipcode, store_city, store_createdBy_fk_user_id);",
     {
       bind: { store: store, listId: listId },
       type: QueryTypes.INSERT, // returns ID of created row
