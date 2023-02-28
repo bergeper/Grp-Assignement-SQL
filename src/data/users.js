@@ -1,17 +1,17 @@
 exports.users = [
   {
-    username: "Per",
-    password: "123456",
+    username: "AdminPerra",
+    password: "apa123",
     email: "per@gmail.com",
   },
   {
     username: "Junita",
-    password: "123456",
+    password: "lus123",
     email: "junita@gmail.com",
   },
   {
     username: "Ida",
-    password: "123456",
+    password: "mus123",
     email: "ida@gmail.com",
   },
 ];
