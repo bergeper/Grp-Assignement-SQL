@@ -2,16 +2,15 @@ const bcrypt = require("bcrypt");
 const { sequelize } = require("./config");
 const { stores } = require("../data/stores");
 const { users } = require("../data/users");
-const { admins } = require("../data/admins");
+
 const { reviews } = require("../data/reviews");
 
 const snowsportsDb = async () => {
   try {
     // Drop tables if exist
     await sequelize.query(`DROP TABLE IF EXISTS reviews;`);
-    await sequelize.query(`DROP TABLE IF EXISTS admins`);
-    await sequelize.query(`DROP TABLE IF EXISTS users;`);
     await sequelize.query(`DROP TABLE IF EXISTS stores;`);
+    await sequelize.query(`DROP TABLE IF EXISTS users;`);
 
     // Create users table
     await sequelize.query(`
@@ -23,13 +22,19 @@ const snowsportsDb = async () => {
     );
     `);
 
+    // Create stores table
     await sequelize.query(`
-    CREATE TABLE IF NOT EXISTS admins (
-      admin_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      password TEXT NOT NULL
-    );
-    `);
+    CREATE TABLE IF NOT EXISTS stores (
+      store_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      store_name TEXT NOT NULL,
+      store_description TEXT NOT NULL,
+      store_adress TEXT NOT NULL,
+      store_zipcode INTEGER NOT NULL,
+      store_city TEXT NOT NULL,
+      store_createdBy_fk_user_id INTEGER NOT NULL,
+      FOREIGN KEY(store_createdBy_fk_user_id) REFERENCES users(user_id)
+      );
+      `);
 
     // Create users table
     await sequelize.query(`
@@ -39,31 +44,18 @@ const snowsportsDb = async () => {
       review_description TEXT NOT NULL,
       review_rating INTEGER NOT NULL,
       fk_user_id INTEGER NOT NULL,
-      FOREIGN KEY(fk_user_id) REFERENCES users(user_id)
+      fk_store_id INTEGER NOT NULL,
+      FOREIGN KEY(fk_user_id) REFERENCES users(user_id),
+      FOREIGN KEY(fk_store_id) REFERENCES stores(store_id)
       );
       `);
-    // Create stores table
-    await sequelize.query(`
-    CREATE TABLE IF NOT EXISTS stores (
-      store_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      store_name TEXT NOT NULL,
-      store_description TEXT NOT NULL,
-      store_zipcode INTEGER NOT NULL,
-      store_owner INTEGER NOT NULL,
-      store_city TEXT NOT NULL,
-      fk_review_id INTEGER,
-      FOREIGN KEY(fk_review_id) REFERENCES reviews(review_id)
-      );
-      `);
-
-    /****************************************/
 
     let userInsertQuery =
       "INSERT INTO users (username, password, email) VALUES ";
 
     let userInsertQueryVariables = [];
 
-    users.forEach(async (user, index, array) => {
+    users.forEach((user, index, array) => {
       let string = "(";
       for (let i = 1; i < 4; i++) {
         string += `$${userInsertQueryVariables.length + i}`;
@@ -72,12 +64,15 @@ const snowsportsDb = async () => {
       userInsertQuery += string + `)`;
       if (index < array.length - 1) userInsertQuery += ",";
 
-      let password = user.password;
+      // let password = user.password;
+      // const salt = await bcrypt.genSalt(10);
+      // user.password = await bcrypt.hash(password, salt);
       // prettier-ignore
-      //const salt = await bcrypt.genSalt(10)
-      //let hashedpassword = await bcrypt.hash(password, salt);
-
-      const variables = [user.username, password, user.email];
+      const variables = [
+        user.username, 
+        user.password, 
+        user.email
+      ];
       // prettier-ignore
       userInsertQueryVariables = [
         ...userInsertQueryVariables, 
@@ -94,76 +89,10 @@ const snowsportsDb = async () => {
       "SELECT username, user_id FROM users"
     );
 
-    // **********************************************
-
-    let adminInsertQuery = "INSERT INTO admins (name, password) VALUES ";
-
-    let adminInsertQueryVariables = [];
-
-    admins.forEach((admin, index, array) => {
-      let string = "(";
-      for (let i = 1; i < 3; i++) {
-        string += `$${adminInsertQueryVariables.length + i}`;
-        if (i < 2) string += ",";
-      }
-      adminInsertQuery += string + `)`;
-      if (index < array.length - 1) adminInsertQuery += ",";
-      // prettier-ignore
-      const variables = [
-        admin.name, 
-        admin.password, 
-
-      ];
-      // prettier-ignore
-      adminInsertQueryVariables = [
-        ...adminInsertQueryVariables, 
-        ...variables
-      ];
-    });
-    adminInsertQuery += `;`;
-
-    await sequelize.query(adminInsertQuery, {
-      bind: adminInsertQueryVariables,
-    });
-
-    /**********************************************/
-
-    let reviewInsertQuery =
-      "INSERT INTO reviews (review_title, review_description, review_rating, fk_user_id) VALUES ";
-
-    let reviewInsertQueryVariables = [];
-
-    reviews.forEach((review, index, array) => {
-      let string = "(";
-      for (let i = 1; i < 5; i++) {
-        string += `$${reviewInsertQueryVariables.length + i}`;
-        if (i < 4) string += ",";
-      }
-      reviewInsertQuery += string + `)`;
-      if (index < array.length - 1) reviewInsertQuery += ",";
-      // prettier-ignore
-      const variables = [
-        review.review_title, 
-        review.review_description, 
-        review.review_rating,
-        review.fk_user_id,
-        ];
-      // prettier-ignore
-      reviewInsertQueryVariables = [
-          ...reviewInsertQueryVariables, 
-          ...variables
-      ];
-    });
-    reviewInsertQuery += `;`;
-
-    await sequelize.query(reviewInsertQuery, {
-      bind: reviewInsertQueryVariables,
-    });
-
-    /**********************************************/
+    /****************************************/
 
     let storeInsertQuery =
-      "INSERT INTO stores (store_name, store_description, store_zipcode, store_owner, store_city, fk_review_id) VALUES ";
+      "INSERT INTO stores (store_name, store_description, store_adress, store_zipcode, store_city, store_createdBy_fk_user_id) VALUES ";
 
     let storeInsertQueryVariables = [];
 
@@ -179,10 +108,10 @@ const snowsportsDb = async () => {
       const variables = [
         store.store_name,
         store.store_description,
+        store.store_adress,
         store.store_zipcode,
-        store.store_owner,
         store.store_city,
-        store.fk_review_id,
+        store.store_createdBy_fk_user_id,
       ];
       storeInsertQueryVariables = [...storeInsertQueryVariables, ...variables];
     });
@@ -190,6 +119,43 @@ const snowsportsDb = async () => {
     await sequelize.query(storeInsertQuery, {
       bind: storeInsertQueryVariables,
     });
+
+    /**********************************************/
+
+    let reviewInsertQuery =
+      "INSERT INTO reviews (review_title, review_description, review_rating, fk_user_id, fk_store_id) VALUES ";
+
+    let reviewInsertQueryVariables = [];
+
+    reviews.forEach((review, index, array) => {
+      let string = "(";
+      for (let i = 1; i < 6; i++) {
+        string += `$${reviewInsertQueryVariables.length + i}`;
+        if (i < 5) string += ",";
+      }
+      reviewInsertQuery += string + `)`;
+      if (index < array.length - 1) reviewInsertQuery += ",";
+      // prettier-ignore
+      const variables = [
+        review.review_title, 
+        review.review_description, 
+        review.review_rating,
+        review.fk_user_id,
+        review.fk_store_id,
+        ];
+      // prettier-ignore
+      reviewInsertQueryVariables = [
+          ...reviewInsertQueryVariables, 
+          ...variables
+      ];
+    });
+    reviewInsertQuery += `;`;
+
+    await sequelize.query(reviewInsertQuery, {
+      bind: reviewInsertQueryVariables,
+    });
+
+    /**********************************************/
 
     console.log(usersRes);
     console.log("Database successfully populated with data...");
