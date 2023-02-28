@@ -6,7 +6,7 @@ const { QueryTypes } = require('sequelize')
 const { userRoles } = require('../constants/users')
 
 exports.register = async (req, res) => {
-	const { password, email } = req.body
+	const { username, password, email } = req.body
 
 	const salt = await bcrypt.genSalt(10)
 	const hashedpassword = await bcrypt.hash(password, salt)
