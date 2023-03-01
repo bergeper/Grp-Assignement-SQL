@@ -3,7 +3,9 @@ require("express-async-errors");
 const express = require("express");
 const apiRoutes = require("./routes");
 const { errorMiddleware } = require("./middleware/errorMiddleware");
-const { notFoundMiddleware } = require("./middleware/notFoundMiddleware");
+const {
+  notFoundMiddleware,
+} = require("./middleware/notFoundMiddleware");
 
 const { sequelize } = require("./database/config");
 
@@ -24,12 +26,14 @@ app.use(errorMiddleware);
 const port = process.env.PORT || 3000;
 const run = async () => {
   try {
-    await sequelize.authenticate();
+    // await sequelize.authenticate();
 
     app.listen(port, () => {
       console.log(
         `Server is listening on ${
-          process.env.NODE_ENV === "development" ? "http://localhost:" : "port "
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:"
+            : "port "
         }${port}`
       );
     });
