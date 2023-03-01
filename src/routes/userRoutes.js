@@ -5,7 +5,7 @@ const {
   getUserById,
   deleteUserById,
   getAllUsers,
-} = require("../controllers/userControllers");
+} = require("../controllers/userController");
 const {
   isAuthenticated,
   authorizeRoles,
