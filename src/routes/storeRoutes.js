@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const {
-  isAuthenticated,
-} = require("../middleware/authenticationMiddleware");
+//const {
+//  isAuthenticated,
+//} = require("../middleware/authenticationMiddleware");
 const {
   getAllStores,
   getStoreById,
@@ -11,10 +11,10 @@ const {
   updateStoreById,
 } = require("../controllers/storeController");
 
-router.get("/", isAuthenticated, getAllStores);
-router.get("/:storeId", isAuthenticated, getStoreById);
-router.post("/", isAuthenticated, createNewStore);
-router.put("/:storeId", isAuthenticated, updateStoreById);
-router.delete("/:storeId", isAuthenticated, deleteStoreById);
+router.get("/", getAllStores);
+router.get("/:storeId", getStoreById);
+// router.post("/", createNewStore);
+// router.put("/:storeId", updateStoreById);
+// router.delete("/:storeId", deleteStoreById);
 
 module.exports = router;

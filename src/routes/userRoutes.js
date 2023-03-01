@@ -5,13 +5,18 @@ const {
   getUserById,
   deleteUserById,
   getAllUsers,
-} = require("../controllers/userControllers");
+} = require("../controllers/userController");
 const {
   isAuthenticated,
   authorizeRoles,
 } = require("../middleware/authenticationMiddleware");
 
-router.get("/", isAuthenticated, authorizeRoles(userRoles.ADMIN), getAllUsers);
+router.get(
+  "/",
+  isAuthenticated,
+  authorizeRoles(userRoles.ADMIN),
+  getAllUsers
+);
 router.get("/:userId", isAuthenticated, getUserById);
 router.delete("/:userId", isAuthenticated, deleteUserById);
 

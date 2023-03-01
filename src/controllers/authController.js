@@ -1,4 +1,4 @@
-const { UnauthenticatedError } = require("../utils/errors");
+//const { UnauthenticatedError } = require("../utils/errors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { sequelize } = require("../database/config");
@@ -46,7 +46,8 @@ exports.login = async (req, res) => {
     canditatePassword,
     user.password
   );
-  if (!isPasswordCorrect) throw new UnauthenticatedError("Invalid Credentials");
+  if (!isPasswordCorrect)
+    throw new UnauthenticatedError("Invalid Credentials");
 
   const jwtPayload = {
     userId: user.user_id,
