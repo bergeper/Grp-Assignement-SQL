@@ -6,7 +6,6 @@ const { errorMiddleware } = require("./middleware/errorMiddleware");
 const {
   notFoundMiddleware,
 } = require("./middleware/notFoundMiddleware");
-
 const { sequelize } = require("./database/config");
 
 const app = express();

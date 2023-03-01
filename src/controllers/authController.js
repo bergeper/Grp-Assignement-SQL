@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
   const hashedpassword = await bcrypt.hash(password, salt);
 
   await sequelize.query(
-    "INSERT INTO users (email, password) VALUES ($email, $password)",
+    "INSERT INTO users (username, email, password) VALUES ($username, $email, $password)",
     {
       bind: {
         username: username,
@@ -28,12 +28,12 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { email, password: canditatePassword } = req.body;
+  const { username, password: canditatePassword } = req.body;
 
   const [user, metadata] = await sequelize.query(
-    "SELECT * FROM users WHERE email = $email LIMIT 1;",
+    "SELECT * FROM users WHERE username = $username LIMIT 1;",
     {
-      bind: { email },
+      bind: { username },
       type: QueryTypes.SELECT,
     }
   );
@@ -50,8 +50,8 @@ exports.login = async (req, res) => {
     throw new UnauthenticatedError("Invalid Credentials");
 
   const jwtPayload = {
-    userId: user.id,
-    email: user.email,
+    userId: user.user_id,
+    username: user.username,
     role: user["is_admin"] === 1 ? userRoles.ADMIN : userRoles.USER,
   };
 
