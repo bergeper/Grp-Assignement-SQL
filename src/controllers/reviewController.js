@@ -1,4 +1,4 @@
-const { QueryTypes } = require("sequelize");
+const { QueryTypes, QueryError } = require("sequelize");
 const { userRoles } = require("../constants/users");
 const { sequelize } = require("../database/config");
 const { UnauthorizedError, NotFoundError } = require("../utils/errors");
@@ -24,12 +24,62 @@ exports.getReviewById = async (req, res) => {
   );
 
   if (!results || results.length == 0) {
-    throw new NotFoundError("We could not find the list you are looking for");
+    throw new NotFoundError(
+      "We could not find the review you are looking for..."
+    );
   }
 
   return res.json(results);
 };
 
 exports.createReview = async (req, res) => {
-  return res.send("Created review");
+  const { review_title, review_description, review_rating } = req.body;
+  const storeId = req.params.storeId;
+  const userId = req.user.userId;
+
+  const [newReviewId] = await sequelize.query(
+    `
+    INSERT INTO reviews (review_title, review_description, review_rating, fk_user_id, fk_store_id)
+    VALUES ($review_title, $review_description, $review_rating, $fk_user_id, $fk_store_id);
+    `,
+    {
+      bind: {
+        review_title: review_title,
+        review_description: review_description,
+        review_rating: review_rating,
+        fk_user_id: userId,
+        fk_store_id: storeId,
+      },
+      type: QueryTypes.INSERT,
+    }
+  );
+
+  return res
+    .setHeader(
+      "Location",
+      `${req.protocol}://${req.headers.host}/api/v1/reviews/${newReviewId.reviewId}`
+    )
+    .sendStatus(201);
+};
+
+exports.deleteReview = async (req, res) => {
+  const reviewId = req.params.reviewId;
+
+  const [review, reviewMeta] = await sequelize.query(
+    `
+  SELECT fk_user_id FROM reviews
+  WHERE review_id = $reviewId  
+  `,
+    {
+      bind: { reviewId: reviewId },
+    }
+  );
+
+  const reviewUserId = review[0].fk_user_id;
+  console.log(reviewUserId);
+  if (req.user.role == userRoles.ADMIN || req.user.userId == reviewUserId) {
+    console.log("true");
+  }
+
+  return res.send(review);
 };
