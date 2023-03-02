@@ -39,8 +39,9 @@ exports.createReview = async (req, res) => {
 
   const [newReviewId] = await sequelize.query(
     `
-  INSERT INTO reviews (review_title, review_description, review_rating, fk_user_id, fk_store_id)
-  VALUES ($review_title, $review_description, $review_rating, $fk_user_id, $fk_store_id);`,
+    INSERT INTO reviews (review_title, review_description, review_rating, fk_user_id, fk_store_id)
+    VALUES ($review_title, $review_description, $review_rating, $fk_user_id, $fk_store_id);
+    `,
     {
       bind: {
         review_title: review_title,
@@ -59,4 +60,8 @@ exports.createReview = async (req, res) => {
       `${req.protocol}://${req.headers.host}/api/v1/reviews/${newReviewId.reviewId}`
     )
     .sendStatus(201);
+};
+
+exports.deleteReview = async (req, res) => {
+  return res.send("yeeeeyeeeeyeeeeyeee");
 };
