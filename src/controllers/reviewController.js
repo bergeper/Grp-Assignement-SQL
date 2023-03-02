@@ -13,7 +13,7 @@ exports.getAllReviews = async (req, res) => {
 exports.getReviewById = async (req, res) => {
   const reviewId = req.params.reviewId;
 
-  const [results, metadata] = await sequelize.query(
+  const [results] = await sequelize.query(
     `
   SELECT * FROM reviews s 
   WHERE review_id = $reviewId
@@ -67,19 +67,36 @@ exports.deleteReview = async (req, res) => {
 
   const [review, reviewMeta] = await sequelize.query(
     `
-  SELECT fk_user_id FROM reviews
+  SELECT * FROM reviews
   WHERE review_id = $reviewId  
   `,
     {
       bind: { reviewId: reviewId },
+      type: QueryTypes.SELECT,
     }
   );
 
-  const reviewUserId = review[0].fk_user_id;
-  console.log(reviewUserId);
-  if (req.user.role == userRoles.ADMIN || req.user.userId == reviewUserId) {
-    console.log("true");
+  if (!review) {
+    throw new NotFoundError("This review does not exist.");
   }
 
-  return res.send(review);
+  if (
+    req.user.role == userRoles.ADMIN ||
+    req.user.userId == review.fk_user_id
+  ) {
+    await sequelize.query(
+      `
+    DELETE FROM reviews
+    WHERE review_id = $reviewId
+    `,
+      {
+        bind: {
+          reviewId: reviewId,
+        },
+        types: QueryTypes.DELETE,
+        y,
+      }
+    );
+  }
+  return res.send("true");
 };
