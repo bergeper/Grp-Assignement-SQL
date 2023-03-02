@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const { sequelize } = require("./config");
 const { stores } = require("../data/stores");
 const { users } = require("../data/users");
-const { citys } = require("../data/citys");
+const { cities } = require("../data/cities");
 const { reviews } = require("../data/reviews");
 
 const snowsportsDb = async () => {
@@ -11,6 +11,7 @@ const snowsportsDb = async () => {
     await sequelize.query(`DROP TABLE IF EXISTS reviews;`);
     await sequelize.query(`DROP TABLE IF EXISTS stores;`);
     await sequelize.query(`DROP TABLE IF EXISTS users;`);
+    await sequelize.query(`DROP TABLE IF EXISTS cities;`);
 
     // Create users table
     await sequelize.query(`
@@ -25,7 +26,7 @@ const snowsportsDb = async () => {
 
     // Create city table
     await sequelize.query(`
-    CREATE TABLE IF NOT EXISTS citys (
+    CREATE TABLE IF NOT EXISTS cities (
       city_id INTEGER PRIMARY KEY AUTOINCREMENT,
       city_name TEXT NOT NULL
     );`);
@@ -40,7 +41,7 @@ const snowsportsDb = async () => {
       store_zipcode INTEGER NOT NULL,
       store_fk_city_id INTEGER NOT NULL,
       store_createdBy_fk_user_id INTEGER NOT NULL,
-      FOREIGN KEY(store_fk_city_id) REFERENCES citys(city_id),
+      FOREIGN KEY(store_fk_city_id) REFERENCES cities(city_id),
       FOREIGN KEY(store_createdBy_fk_user_id) REFERENCES users(user_id)
       );
       `);
@@ -104,11 +105,11 @@ const snowsportsDb = async () => {
 
     //const [usersRes, metadata] = await sequelize.query("SELECT * FROM users");
 
-    let cityInsertQuery = "INSERT INTO citys (city_name) VALUES ";
+    let cityInsertQuery = "INSERT INTO cities (city_name) VALUES ";
 
     let cityInsertQueryVariables = [];
 
-    citys.forEach((citys, index, array) => {
+    cities.forEach((cities, index, array) => {
       let string = "(";
       for (let i = 1; i < 2; i++) {
         string += `$${cityInsertQueryVariables.length + i}`;
@@ -117,7 +118,7 @@ const snowsportsDb = async () => {
       cityInsertQuery += string + ")";
       if (index < array.length - 1) cityInsertQuery += ",";
 
-      const variables = [citys.city_name];
+      const variables = [cities.city_name];
       cityInsertQueryVariables = [...cityInsertQueryVariables, ...variables];
     });
     cityInsertQuery += ";";
