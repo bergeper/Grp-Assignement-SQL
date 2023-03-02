@@ -32,9 +32,7 @@ exports.getStoreById = async (req, res) => {
   console.log("=================>" + results);
 
   if (!results || results.length == 0) {
-    throw new NotFoundError(
-      "We could not find the list you are looking for"
-    );
+    throw new NotFoundError("We could not find the list you are looking for");
   }
 
   return res.json(results);

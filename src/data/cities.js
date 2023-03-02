@@ -1,4 +1,4 @@
-exports.citys = [
+exports.cities = [
   {
     city_name: "Undersåker",
   },

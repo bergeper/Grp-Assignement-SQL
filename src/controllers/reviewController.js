@@ -29,3 +29,7 @@ exports.getReviewById = async (req, res) => {
 
   return res.json(results);
 };
+
+exports.createReview = async (req, res) => {
+  return res.send("Created review");
+};
