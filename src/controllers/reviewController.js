@@ -63,5 +63,23 @@ exports.createReview = async (req, res) => {
 };
 
 exports.deleteReview = async (req, res) => {
-  return res.send("yeeeeyeeeeyeeeeyeee");
+  const reviewId = req.params.reviewId;
+
+  const [review, reviewMeta] = await sequelize.query(
+    `
+  SELECT fk_user_id FROM reviews
+  WHERE review_id = $reviewId  
+  `,
+    {
+      bind: { reviewId: reviewId },
+    }
+  );
+
+  const reviewUserId = review[0].fk_user_id;
+  console.log(reviewUserId);
+  if (req.user.role == userRoles.ADMIN || req.user.userId == reviewUserId) {
+    console.log("true");
+  }
+
+  return res.send(review);
 };
