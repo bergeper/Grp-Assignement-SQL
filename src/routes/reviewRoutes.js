@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
-//const {
-//  isAuthenticated,
-//} = require("../middleware/authenticationMiddleware");
+const { isAuthenticated } = require("../middleware/authenticationMiddleware");
 const {
   getAllReviews,
   getReviewById,
@@ -11,6 +9,6 @@ const {
 
 router.get("/", getAllReviews);
 router.get("/:reviewId", getReviewById);
-router.post("/", createReview);
+router.post("/:storeId", isAuthenticated, createReview);
 
 module.exports = router;
