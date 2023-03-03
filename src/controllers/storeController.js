@@ -89,7 +89,8 @@ exports.deleteStore = async (req, res) => {
         bind: { storeId: storeId },
       }
     );
-    return res.send("hej");
+
+    return res.send("deleted");
   } else {
     return res
       .status(403)
@@ -97,7 +98,7 @@ exports.deleteStore = async (req, res) => {
   }
 };
 
-exports.createStore = async (req, res) => {
+exports.createNewStore = async (req, res) => {
   const {
     store_name,
     store_description,
@@ -134,4 +135,39 @@ exports.createStore = async (req, res) => {
     .sendStatus(201);
 };
 
-exports.updateStoreById = (req, res) => res.send("updateStoreById");
+exports.updateStoreById = async (req, res) => {
+  const {
+    store_name,
+    store_description,
+    store_adress,
+    store_zipcode,
+    store_fk_city_id,
+    store_createdBy_fk_user_id,
+  } = req.body;
+  const userId = req.user.userId;
+
+  const [newStoreId] = await sequelize.query(
+    `
+    UPDATE stores SET store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id
+    VALUES $store_name, $store_description, $store_adress, $store_zipcode, $store_fk_city_id, $store_createdBy_fk_user_id;
+    `,
+    {
+      bind: {
+        store_name: store_name,
+        store_description: store_description,
+        store_adress: store_adress,
+        store_zipcode: store_zipcode,
+        store_fk_city_id: store_fk_city_id,
+        store_createdBy_fk_user_id: store_createdBy_fk_user_id,
+      },
+      type: QueryTypes.INSERT,
+    }
+  );
+
+  return res
+    .setHeader(
+      "Location",
+      `${req.protocol}://${req.headers.host}/api/v1/stores/${newStoreId.userId}`
+    )
+    .sendStatus(201);
+};
