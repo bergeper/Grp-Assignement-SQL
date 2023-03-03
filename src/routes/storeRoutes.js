@@ -13,8 +13,8 @@ const {
 
 router.get("/", getAllStores);
 router.get("/:storeId", getStoreById);
-// router.post("/", createNewStore);
-// router.put("/:storeId", updateStoreById);
+router.post("/", isAuthenticated, createNewStore);
+router.put("/:storeId", isAuthenticated, updateStoreById);
 router.delete("/:storeId", isAuthenticated, deleteStore);
 
 module.exports = router;

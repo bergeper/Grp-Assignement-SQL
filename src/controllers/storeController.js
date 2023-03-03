@@ -51,7 +51,9 @@ exports.getStoreById = async (req, res) => {
   console.log("=================>" + results);
 
   if (!results || results.length == 0) {
-    throw new NotFoundError("We could not find the list you are looking for");
+    throw new NotFoundError(
+      "We could not find the list you are looking for"
+    );
   }
 
   return res.json(results);
@@ -73,21 +75,29 @@ exports.deleteStore = async (req, res) => {
   const userId = store[0].store_createdBy_fk_user_id;
 
   if (req.user.role == userRoles.ADMIN || req.user.userId == userId) {
-    await sequelize.query(`DELETE FROM reviews WHERE fk_store_id = $storeId`, {
-      bind: { storeId: storeId },
-    });
+    await sequelize.query(
+      `DELETE FROM reviews WHERE fk_store_id = $storeId`,
+      {
+        bind: { storeId: storeId },
+      }
+    );
 
     console.log("true");
-    await sequelize.query(`DELETE FROM stores WHERE store_Id = $storeId`, {
-      bind: { storeId: storeId },
-    });
+    await sequelize.query(
+      `DELETE FROM stores WHERE store_Id = $storeId`,
+      {
+        bind: { storeId: storeId },
+      }
+    );
     return res.send("hej");
   } else {
-    return res.status(403).json("You are not authorized to delete this store");
+    return res
+      .status(403)
+      .json("You are not authorized to delete this store");
   }
 };
 
-exports.createStore = async (req, res) => {
+exports.createNewStore = async (req, res) => {
   const {
     store_name,
     store_description,
@@ -124,4 +134,39 @@ exports.createStore = async (req, res) => {
     .sendStatus(201);
 };
 
-exports.updateStoreById = (req, res) => res.send("updateStoreById");
+exports.updateStoreById = async (req, res) => {
+  const {
+    store_name,
+    store_description,
+    store_adress,
+    store_zipcode,
+    store_fk_city_id,
+    store_createdBy_fk_user_id,
+  } = req.body;
+  const userId = req.user.userId;
+
+  const [newStoreId] = await sequelize.query(
+    `
+    UPDATE stores SET store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id
+    VALUES $store_name, $store_description, $store_adress, $store_zipcode, $store_fk_city_id, $store_createdBy_fk_user_id;
+    `,
+    {
+      bind: {
+        store_name: store_name,
+        store_description: store_description,
+        store_adress: store_adress,
+        store_zipcode: store_zipcode,
+        store_fk_city_id: store_fk_city_id,
+        store_createdBy_fk_user_id: store_createdBy_fk_user_id,
+      },
+      type: QueryTypes.INSERT,
+    }
+  );
+
+  return res
+    .setHeader(
+      "Location",
+      `${req.protocol}://${req.headers.host}/api/v1/stores/${newStoreId.userId}`
+    )
+    .sendStatus(201);
+};
