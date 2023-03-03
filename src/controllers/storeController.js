@@ -89,8 +89,7 @@ exports.deleteStore = async (req, res) => {
         bind: { storeId: storeId },
       }
     );
-
-    return res.send("deleted");
+    return res.send("hej");
   } else {
     return res
       .status(403)
