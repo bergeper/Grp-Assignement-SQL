@@ -143,30 +143,59 @@ exports.updateStoreById = async (req, res) => {
     store_fk_city_id,
     store_createdBy_fk_user_id,
   } = req.body;
+  const storeId = req.params.storeId;
   const userId = req.user.userId;
+  const userRole = req.user.role;
 
-  const [newStoreId] = await sequelize.query(
+  if (
+    !store_name ||
+    !store_description ||
+    !store_adress ||
+    !store_zipcode ||
+    !store_fk_city_id ||
+    !store_createdBy_fk_user_id
+  ) {
+    throw new BadRequestError(
+      "You must enter values for each field."
+    );
+  }
+
+  const store = await sequelize.query(
     `
-    UPDATE stores SET store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id
-    VALUES $store_name, $store_description, $store_adress, $store_zipcode, $store_fk_city_id, $store_createdBy_fk_user_id;
-    `,
+  SELECT * FROM stores
+  WHERE store_id = $storeId  
+  `,
     {
-      bind: {
-        store_name: store_name,
-        store_description: store_description,
-        store_adress: store_adress,
-        store_zipcode: store_zipcode,
-        store_fk_city_id: store_fk_city_id,
-        store_createdBy_fk_user_id: store_createdBy_fk_user_id,
-      },
-      type: QueryTypes.INSERT,
+      bind: { storeId: storeId },
+      type: QueryTypes.SELECT,
     }
   );
 
-  return res
-    .setHeader(
-      "Location",
-      `${req.protocol}://${req.headers.host}/api/v1/stores/${newStoreId.userId}`
-    )
-    .sendStatus(201);
+  if (store.length <= 0)
+    throw new UnauthorizedError("Store does not exist.");
+
+  if (userRole == userRoles.ADMIN || userId == review[0].fk_user_id) {
+    const [updatedStore] = await sequelize.query(
+      `
+    UPDATE stores SET store_name = $store_name, store_description = $store_description, store_adress = $store_adress, store_zipcode = $store_zipcode, store_fk_city_id = $store_fk_city_id, store_createdBy_fk_user_id = $store_createdBy_fk_user_id WHERE store_id = $storeId;
+    `,
+      {
+        bind: {
+          store_name: store_name,
+          store_description: store_description,
+          store_adress: store_adress,
+          store_zipcode: store_zipcode,
+          store_fk_city_id: store_fk_city_id,
+          store_createdBy_fk_user_id: store_createdBy_fk_user_id,
+        },
+        type: QueryTypes.UPDATE,
+      }
+    );
+
+    return res.json(updatedStore);
+  } else {
+    throw new UnauthorizedError(
+      "Your trying to delete a store created by another user."
+    );
+  }
 };
