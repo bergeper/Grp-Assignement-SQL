@@ -1,5 +1,5 @@
 const { user } = require("../data/users");
-//const { NotFoundError, UnauthorizedError } = require("../utils");
+const { NotFoundError, UnauthorizedError } = require("../utils/errors");
 const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
 
