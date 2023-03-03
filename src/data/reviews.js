@@ -28,7 +28,7 @@ exports.reviews = [
     review_description:
       "Pig rooster sheep. Brussel sprouts cow, rabbits a gates a, storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
     review_rating: 4,
-    fk_user_id: 2,
+    fk_user_id: 3,
     fk_store_id: 5,
   },
   {
@@ -36,7 +36,7 @@ exports.reviews = [
     review_description:
       "Pig rooster sheep. Brussel sprouts cow, rabbits a gates a, storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
     review_rating: 4,
-    fk_user_id: 2,
+    fk_user_id: 3,
     fk_store_id: 1,
   },
   {
@@ -44,7 +44,7 @@ exports.reviews = [
     review_description:
       "Pig rooster sheep. Brussel sprouts cow, rabbits a gates a, storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
     review_rating: 4,
-    fk_user_id: 2,
+    fk_user_id: 3,
     fk_store_id: 6,
   },
   {
@@ -52,7 +52,7 @@ exports.reviews = [
     review_description:
       "Pig rooster sheep. Brussel sprouts cow, rabbits a gates a, storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
     review_rating: 4,
-    fk_user_id: 2,
+    fk_user_id: 1,
     fk_store_id: 9,
   },
   {
@@ -60,7 +60,7 @@ exports.reviews = [
     review_description:
       "Pig rooster sheep. Brussel sprouts cow, rabbits a gates a, storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
     review_rating: 4,
-    fk_user_id: 2,
+    fk_user_id: 4,
     fk_store_id: 1,
   },
   {
@@ -68,7 +68,7 @@ exports.reviews = [
     review_description:
       "Pig rooster sheep. Brussel sprouts cow, rabbits a gates a, storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
     review_rating: 4,
-    fk_user_id: 2,
+    fk_user_id: 4,
     fk_store_id: 10,
   },
   {
@@ -76,7 +76,7 @@ exports.reviews = [
     review_description:
       "Pig rooster sheep. Brussel sprouts cow, rabbits a gates a, storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
     review_rating: 4,
-    fk_user_id: 2,
+    fk_user_id: 4,
     fk_store_id: 6,
   },
   {
@@ -84,7 +84,7 @@ exports.reviews = [
     review_description:
       "Pig rooster sheep. Brussel sprouts cow, rabbits a gates a, storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
     review_rating: 2,
-    fk_user_id: 2,
+    fk_user_id: 4,
     fk_store_id: 10,
   },
 ];
