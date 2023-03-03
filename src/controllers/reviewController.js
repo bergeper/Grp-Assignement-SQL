@@ -43,8 +43,8 @@ exports.createNewReview = async (req, res) => {
 
   const [newReviewId] = await sequelize.query(
     `
-    INSERT INTO reviews (review_title, review_description, review_rating, fk_user_id, fk_store_id)
-    VALUES ($review_title, $review_description, $review_rating, $fk_user_id, $fk_store_id);
+      INSERT INTO reviews (review_title, review_description, review_rating, fk_user_id, fk_store_id)
+      VALUES ($review_title, $review_description, $review_rating, $fk_user_id, $fk_store_id);
     `,
     {
       bind: {
@@ -57,7 +57,6 @@ exports.createNewReview = async (req, res) => {
       type: QueryTypes.INSERT,
     }
   );
-
   return res
     .setHeader(
       "Location",
@@ -133,9 +132,9 @@ exports.updateReviewById = async (req, res) => {
     const [updateReview] = await sequelize.query(
       `
       UPDATE reviews SET review_title = $review_title, review_description = $review_description, review_rating = $review_rating
-  WHERE review_id = $reviewId
-  RETURNING *;
-  `,
+    WHERE review_id = $reviewId
+    RETURNING *;
+    `,
       {
         bind: {
           review_title: review_title,

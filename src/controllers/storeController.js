@@ -51,9 +51,7 @@ exports.getStoreById = async (req, res) => {
   console.log("=================>" + results);
 
   if (!results || results.length == 0) {
-    throw new NotFoundError(
-      "We could not find the list you are looking for"
-    );
+    throw new NotFoundError("We could not find the list you are looking for");
   }
 
   return res.json(results);
@@ -75,25 +73,17 @@ exports.deleteStore = async (req, res) => {
   const userId = store[0].store_createdBy_fk_user_id;
 
   if (req.user.role == userRoles.ADMIN || req.user.userId == userId) {
-    await sequelize.query(
-      `DELETE FROM reviews WHERE fk_store_id = $storeId`,
-      {
-        bind: { storeId: storeId },
-      }
-    );
+    await sequelize.query(`DELETE FROM reviews WHERE fk_store_id = $storeId`, {
+      bind: { storeId: storeId },
+    });
 
     console.log("true");
-    await sequelize.query(
-      `DELETE FROM stores WHERE store_Id = $storeId`,
-      {
-        bind: { storeId: storeId },
-      }
-    );
+    await sequelize.query(`DELETE FROM stores WHERE store_Id = $storeId`, {
+      bind: { storeId: storeId },
+    });
     return res.send("hej");
   } else {
-    return res
-      .status(403)
-      .json("You are not authorized to delete this store");
+    return res.status(403).json("You are not authorized to delete this store");
   }
 };
 
