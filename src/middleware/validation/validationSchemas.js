@@ -34,6 +34,12 @@ exports.reviewSchema = [
     .withMessage("You must provide a number between 1 and 5."),
 ];
 
+exports.storeSchema = [
+  body("store_name")
+    .not()
+    .isEmpty()
+    .withMessage("You must provide a store name"),
+];
 exports.loginSchema = [
   body("username").not().isEmpty().withMessage("You must provide a username"),
   body("password").not().isEmpty().withMessage("You must provide a password"),
