@@ -29,10 +29,10 @@ exports.getReviewById = async (req, res) => {
     );
   }
 
-  return res.json(results);
+  return res.sendStatus(200).json(results);
 };
 
-exports.createReview = async (req, res) => {
+exports.createNewReview = async (req, res) => {
   const { review_title, review_description, review_rating } = req.body;
   const storeId = req.params.storeId;
   const userId = req.user.userId;
@@ -62,7 +62,7 @@ exports.createReview = async (req, res) => {
     .sendStatus(201);
 };
 
-exports.deleteReview = async (req, res) => {
+exports.deleteReviewById = async (req, res) => {
   const reviewId = req.params.reviewId;
 
   const [review, reviewMeta] = await sequelize.query(
@@ -97,6 +97,33 @@ exports.deleteReview = async (req, res) => {
         y,
       }
     );
+    return res.sendStatus(204);
+  } else {
+    throw new UnauthorizedError("You are not allowed to delete this review.");
   }
-  return res.send("true");
+};
+
+exports.updateReviewById = async (req, res) => {
+  const { review_title, review_description, review_rating } = req.body;
+  const reviewId = req.params.reviewId;
+  // const userId = req.user.userId;
+
+  const [updateReview] = await sequelize.query(
+    `
+  UPDATE reviews SET review_title = $review_title, review_description = $review_description, review_rating = $review_rating
+  WHERE review_id = $reviewid
+  RETURNING *;
+  `,
+    {
+      bind: {
+        review_title: review_title,
+        review_description: review_description,
+        review_rating: review_rating,
+        reviewid: reviewId,
+      },
+      type: QueryTypes.UPDATE,
+    }
+  );
+
+  return res.json(updateReview);
 };
