@@ -13,6 +13,6 @@ router.get("/", getAllReviews);
 router.get("/:reviewId", getReviewById);
 router.post("/:storeId", isAuthenticated, createNewReview);
 router.delete("/:reviewId", isAuthenticated, deleteReviewById);
-router.put("/:reviewId", updateReviewById);
+router.put("/:reviewId", isAuthenticated, updateReviewById);
 
 module.exports = router;

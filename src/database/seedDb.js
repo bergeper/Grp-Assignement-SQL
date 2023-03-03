@@ -20,7 +20,7 @@ const snowsportsDb = async () => {
       username TEXT NOT NULL,
       password TEXT NOT NULL,
       email TEXT NOT NULL,
-      is_admin BOOLEAN NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1)) 
+      role TEXT NOT NULL DEFAULT "USER"
     );
     `);
 
@@ -60,48 +60,28 @@ const snowsportsDb = async () => {
       );
       `);
 
-    const hashPw = async (password) => {
+    // Create USER
+    let userInsertQuery = `INSERT INTO users (username, email, password, role) VALUES `;
+
+    let userInsertQueryVariables = [];
+
+    for (let i = 0; i < users.length; i++) {
+      let username = users[i].username;
+      let email = users[i].email;
+      let password = users[i].password;
+      let role = users[i].role;
+
       const salt = await bcrypt.genSalt(10);
       const hashedpassword = await bcrypt.hash(password, salt);
-      return hashedpassword;
-    };
 
-    let HashedPwOne = await hashPw(users[0].password);
-    let HashedPwTwo = await hashPw(users[1].password);
-    let HashedPwThree = await hashPw(users[2].password);
+      let values = `("${username}", "${email}", "${hashedpassword}", "${role}")`;
+      userInsertQuery += values;
+      if (i < users.length - 1) userInsertQuery += ", ";
+    }
 
-    await sequelize.query(
-      "INSERT INTO users (username, email, password, is_admin) VALUES ($username, $email, $password, TRUE)",
-      {
-        bind: {
-          username: users[0].username,
-          email: users[0].email,
-          password: HashedPwOne,
-        },
-      }
-    );
+    userInsertQuery += ";";
 
-    await sequelize.query(
-      "INSERT INTO users (username, email, password) VALUES ($username, $email, $password)",
-      {
-        bind: {
-          username: users[1].username,
-          email: users[1].email,
-          password: HashedPwTwo,
-        },
-      }
-    );
-
-    await sequelize.query(
-      "INSERT INTO users (username, email, password) VALUES ($username, $email, $password)",
-      {
-        bind: {
-          username: users[2].username,
-          email: users[2].email,
-          password: HashedPwThree,
-        },
-      }
-    );
+    await sequelize.query(userInsertQuery);
 
     //const [usersRes, metadata] = await sequelize.query("SELECT * FROM users");
 

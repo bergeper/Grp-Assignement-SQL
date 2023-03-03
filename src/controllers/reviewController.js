@@ -1,7 +1,11 @@
 const { QueryTypes, QueryError } = require("sequelize");
 const { userRoles } = require("../constants/users");
 const { sequelize } = require("../database/config");
-const { UnauthorizedError, NotFoundError } = require("../utils/errors");
+const {
+  UnauthorizedError,
+  NotFoundError,
+  BadRequestError,
+} = require("../utils/errors");
 
 exports.getAllReviews = async (req, res) => {
   const [reviews, metadata] = await sequelize.query(`
@@ -94,7 +98,6 @@ exports.deleteReviewById = async (req, res) => {
           reviewId: reviewId,
         },
         types: QueryTypes.DELETE,
-        y,
       }
     );
     return res.sendStatus(204);
@@ -106,24 +109,48 @@ exports.deleteReviewById = async (req, res) => {
 exports.updateReviewById = async (req, res) => {
   const { review_title, review_description, review_rating } = req.body;
   const reviewId = req.params.reviewId;
-  // const userId = req.user.userId;
+  const userId = req.user.userId;
+  const userRole = req.user.role;
 
-  const [updateReview] = await sequelize.query(
+  if (!review_description || !review_title || !review_rating) {
+    throw new BadRequestError("You must enter values for each field.");
+  }
+
+  const review = await sequelize.query(
     `
-  UPDATE reviews SET review_title = $review_title, review_description = $review_description, review_rating = $review_rating
-  WHERE review_id = $reviewid
-  RETURNING *;
+  SELECT * FROM reviews
+  WHERE review_id = $reviewId  
   `,
     {
-      bind: {
-        review_title: review_title,
-        review_description: review_description,
-        review_rating: review_rating,
-        reviewid: reviewId,
-      },
-      type: QueryTypes.UPDATE,
+      bind: { reviewId: reviewId },
+      type: QueryTypes.SELECT,
     }
   );
 
-  return res.json(updateReview);
+  if (review.length <= 0) throw new UnauthorizedError("Review does not exist.");
+
+  if (userRole == userRoles.ADMIN || userId == review[0].fk_user_id) {
+    const [updateReview] = await sequelize.query(
+      `
+      UPDATE reviews SET review_title = $review_title, review_description = $review_description, review_rating = $review_rating
+  WHERE review_id = $reviewId
+  RETURNING *;
+  `,
+      {
+        bind: {
+          review_title: review_title,
+          review_description: review_description,
+          review_rating: review_rating,
+          reviewId: reviewId,
+        },
+        type: QueryTypes.UPDATE,
+      }
+    );
+
+    return res.json(updateReview);
+  } else {
+    throw new UnauthorizedError(
+      "Your trying to delete a review created by another user."
+    );
+  }
 };
