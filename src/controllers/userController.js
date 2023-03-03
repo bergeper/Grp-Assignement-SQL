@@ -4,9 +4,7 @@ const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
 
 exports.getAllUsers = async (req, res) => {
-  const [users, metadata] = await sequelize.query(
-    "SELECT username, password, email FROM users"
-  );
+  const [users, metadata] = await sequelize.query("SELECT * FROM users");
   return res.json(users);
 };
 
@@ -31,10 +29,7 @@ exports.deleteUserById = async (req, res) => {
   const userId = req.params.userId;
 
   // Check if user is admin || user is requesting to delete themselves
-  if (
-    userId != req.user?.userId &&
-    req.user.role !== userRoles.ADMIN
-  ) {
+  if (userId != req.user?.userId && req.user.role !== userRoles.ADMIN) {
     throw new UnauthorizedError("Unauthorized Access");
   }
 
@@ -50,12 +45,9 @@ exports.deleteUserById = async (req, res) => {
   if (!results || !results[0])
     throw new NotFoundError("That user does not exist");
 
-  await sequelize.query(
-    "DELETE FROM users_lists WHERE fk_usersid = $userId",
-    {
-      bind: { userId: userId },
-    }
-  );
+  await sequelize.query("DELETE FROM users_lists WHERE fk_usersid = $userId", {
+    bind: { userId: userId },
+  });
 
   // Send back user info
   return res.sendStatus(204);
