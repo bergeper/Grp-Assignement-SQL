@@ -177,7 +177,11 @@ exports.updateStoreById = async (req, res) => {
   if (userRole == userRoles.ADMIN || userId == review[0].fk_user_id) {
     const [updatedStore] = await sequelize.query(
       `
-    UPDATE stores SET store_name = $store_name, store_description = $store_description, store_adress = $store_adress, store_zipcode = $store_zipcode, store_fk_city_id = $store_fk_city_id, store_createdBy_fk_user_id = $store_createdBy_fk_user_id WHERE store_id = $storeId;
+    UPDATE stores SET store_name = $store_name, store_description = $store_description, 
+    store_adress = $store_adress, store_zipcode = $store_zipcode, 
+    store_fk_city_id = $store_fk_city_id, store_createdBy_fk_user_id = $store_createdBy_fk_user_id 
+    WHERE store_id = $storeId;
+    RETURNING *;
     `,
       {
         bind: {
