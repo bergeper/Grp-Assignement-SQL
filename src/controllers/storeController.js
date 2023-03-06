@@ -5,29 +5,39 @@ const { UnauthorizedError } = require("../utils/errors");
 
 exports.getAllStores = async (req, res) => {
   const city = req.query.city;
+  const limit = req.query?.limit || 10;
+  const offset = req.query?.offset || 0;
 
   console.log(city);
 
   if (!city) {
-    const [store, metadata] = await sequelize.query(`
-  SELECT * FROM store s 
-  `);
+    const [store, metadata] = await sequelize.query(
+      `
+  SELECT * FROM store s LIMIT $limit OFFSET $offset
+  `,
+      {
+        bind: { limit: limit, offset: offset },
+      }
+    );
     console.log(store);
     //  return res.send("här");
     return res.json(store);
   } else {
     const formattedCity = city.trim();
 
+    // vill få tillbaka lite fler saker.
+
     const [results] = await sequelize.query(
       `SELECT s.store_id, s.store_name, c.city_name
       FROM store s 
       LEFT JOIN city c ON c.city_id = s.store_fk_city_id 
-      WHERE c.city_name = $city;`,
+      WHERE c.city_name = $city
+      LIMIT $limit
+      OFFSET $offset;`,
       {
-        bind: { city: formattedCity },
+        bind: { city: formattedCity, limit: limit, offset: offset },
       }
     );
-    console.log("======> results här" + results);
 
     return res.json(results);
   }
@@ -36,23 +46,44 @@ exports.getAllStores = async (req, res) => {
 exports.getStoreById = async (req, res) => {
   const storeId = req.params.storeId;
 
-  const [results, metadata] = await sequelize.query(
+  const [store] = await sequelize.query(
     `
   SELECT store_id, store_name FROM store s 
   WHERE store_id = $storeId
   `,
     {
       bind: { storeId: storeId },
+      type: QueryTypes.SELECT,
     }
   );
 
-  console.log("=================>" + results);
+  const reviews = await sequelize.query(
+    `
+  SELECT r.review_id, r.review_title, r.review_description, r.review_rating, u.username
+  FROM review r
+  JOIN user u ON s.store_id = r.fk_store_id
+  JOIN store s ON u.user_id = r.fk_user_id
+  WHERE s.store_id = $storeId
+  `,
+    {
+      bind: {
+        storeId: storeId,
+      },
+      type: QueryTypes.SELECT,
+    }
+  );
 
-  if (!results || results.length == 0) {
-    throw new NotFoundError("We could not find the list you are looking for");
+  if (!store || store.length == 0) {
+    throw new NotFoundError(
+      "We could not find the list you are looking for"
+    );
   }
 
-  return res.json(results);
+  const response = {
+    store: store,
+    reviews: reviews,
+  };
+  return res.json(response);
 };
 
 exports.deleteStore = async (req, res) => {
@@ -71,17 +102,25 @@ exports.deleteStore = async (req, res) => {
   const userId = store[0].store_createdBy_fk_user_id;
 
   if (req.user.role == userRoles.ADMIN || req.user.userId == userId) {
-    await sequelize.query(`DELETE FROM reviews WHERE fk_store_id = $storeId`, {
-      bind: { storeId: storeId },
-    });
+    await sequelize.query(
+      `DELETE FROM reviews WHERE fk_store_id = $storeId`,
+      {
+        bind: { storeId: storeId },
+      }
+    );
 
     console.log("true");
-    await sequelize.query(`DELETE FROM store WHERE store_Id = $storeId`, {
-      bind: { storeId: storeId },
-    });
+    await sequelize.query(
+      `DELETE FROM store WHERE store_Id = $storeId`,
+      {
+        bind: { storeId: storeId },
+      }
+    );
     return res.send("hej");
   } else {
-    return res.status(403).json("You are not authorized to delete this store");
+    return res
+      .status(403)
+      .json("You are not authorized to delete this store");
   }
 };
 
@@ -95,7 +134,19 @@ exports.createNewStore = async (req, res) => {
   } = req.body;
   const userId = req.user.userId;
 
-  // INSERT INTO city,
+  const [newCityId] = await sequelize.query(
+    `
+  INSERT INTO city (city_name) VALUES ($store_city);
+  `,
+    {
+      bind: {
+        store_city: store_city,
+      },
+      type: QueryTypes.INSERT,
+    }
+  );
+
+  console.log(newCityId);
 
   const [newStoreId] = await sequelize.query(
     `
@@ -108,7 +159,7 @@ exports.createNewStore = async (req, res) => {
         store_description: store_description,
         store_adress: store_adress,
         store_zipcode: store_zipcode,
-        store_fk_city_id: city.city_id,
+        store_fk_city_id: newCityId,
         store_createdBy_fk_user_id: userId,
       },
       type: QueryTypes.INSERT,
@@ -142,7 +193,9 @@ exports.updateStoreById = async (req, res) => {
     !store_zipcode ||
     !store_fk_city_id
   ) {
-    throw new BadRequestError("You must enter values for each field.");
+    throw new BadRequestError(
+      "You must enter values for each field."
+    );
   }
 
   const store = await sequelize.query(
@@ -156,7 +209,8 @@ exports.updateStoreById = async (req, res) => {
     }
   );
 
-  if (store.length <= 0) throw new UnauthorizedError("Store does not exist.");
+  if (store.length <= 0)
+    throw new UnauthorizedError("Store does not exist.");
 
   if (userRole == userRoles.ADMIN || userId == review[0].fk_user_id) {
     const [updatedStore] = await sequelize.query(
