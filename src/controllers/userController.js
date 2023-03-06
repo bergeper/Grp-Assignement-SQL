@@ -1,10 +1,9 @@
-const { user } = require("../data/users");
 const { NotFoundError, UnauthorizedError } = require("../utils/errors");
 const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
 
 exports.getAllUsers = async (req, res) => {
-  const [users, metadata] = await sequelize.query("SELECT * FROM users");
+  const [users, metadata] = await sequelize.query("SELECT * FROM user");
   return res.json(users);
 };
 
@@ -12,7 +11,7 @@ exports.getUserById = async (req, res) => {
   const userId = req.params.userId;
 
   const [user, metadata] = await sequelize.query(
-    "SELECT id, email FROM users WHERE id = $userId",
+    "SELECT id, email FROM user WHERE id = $userId",
     {
       bind: { userId: userId },
       type: QueryTypes.SELECT,
@@ -35,7 +34,7 @@ exports.deleteUserById = async (req, res) => {
 
   // Delete the user from the database
   const [results, metadata] = await sequelize.query(
-    "DELETE FROM users WHERE id = $userId RETURNING *",
+    "DELETE FROM user WHERE id = $userId RETURNING *",
     {
       bind: { userId: userId },
     }
@@ -45,7 +44,7 @@ exports.deleteUserById = async (req, res) => {
   if (!results || !results[0])
     throw new NotFoundError("That user does not exist");
 
-  await sequelize.query("DELETE FROM users_lists WHERE fk_usersid = $userId", {
+  await sequelize.query("DELETE FROM user_lists WHERE fk_user_id = $userId", {
     bind: { userId: userId },
   });
 

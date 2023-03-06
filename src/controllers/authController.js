@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
   const hashedpassword = await bcrypt.hash(password, salt);
 
   await sequelize.query(
-    "INSERT INTO users (username, email, password) VALUES ($username, $email, $password)",
+    "INSERT INTO user (username, email, password) VALUES ($username, $email, $password)",
     {
       bind: {
         username: username,
@@ -31,7 +31,7 @@ exports.login = async (req, res) => {
   const { username, password: canditatePassword } = req.body;
 
   const [user, metadata] = await sequelize.query(
-    "SELECT * FROM users WHERE username = $username LIMIT 1;",
+    "SELECT * FROM user WHERE username = $username LIMIT 1;",
     {
       bind: { username },
       type: QueryTypes.SELECT,

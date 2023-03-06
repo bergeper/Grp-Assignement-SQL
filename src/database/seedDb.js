@@ -8,14 +8,14 @@ const { reviews } = require("../data/reviews");
 const snowsportsDb = async () => {
   try {
     // Drop tables if exist
-    await sequelize.query(`DROP TABLE IF EXISTS reviews;`);
-    await sequelize.query(`DROP TABLE IF EXISTS stores;`);
-    await sequelize.query(`DROP TABLE IF EXISTS users;`);
-    await sequelize.query(`DROP TABLE IF EXISTS cities;`);
+    await sequelize.query(`DROP TABLE IF EXISTS review;`);
+    await sequelize.query(`DROP TABLE IF EXISTS store;`);
+    await sequelize.query(`DROP TABLE IF EXISTS user;`);
+    await sequelize.query(`DROP TABLE IF EXISTS city;`);
 
     // Create users table
     await sequelize.query(`
-    CREATE TABLE IF NOT EXISTS users (
+    CREATE TABLE IF NOT EXISTS user (
       user_id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL,
       password TEXT NOT NULL,
@@ -26,14 +26,14 @@ const snowsportsDb = async () => {
 
     // Create city table
     await sequelize.query(`
-    CREATE TABLE IF NOT EXISTS cities (
+    CREATE TABLE IF NOT EXISTS city (
       city_id INTEGER PRIMARY KEY AUTOINCREMENT,
       city_name TEXT NOT NULL
     );`);
 
     // Create stores table
     await sequelize.query(`
-    CREATE TABLE IF NOT EXISTS stores (
+    CREATE TABLE IF NOT EXISTS store (
       store_id INTEGER PRIMARY KEY AUTOINCREMENT,
       store_name TEXT NOT NULL,
       store_description TEXT NOT NULL,
@@ -41,27 +41,27 @@ const snowsportsDb = async () => {
       store_zipcode INTEGER NOT NULL,
       store_fk_city_id INTEGER NOT NULL,
       store_createdBy_fk_user_id INTEGER NOT NULL,
-      FOREIGN KEY(store_fk_city_id) REFERENCES cities(city_id),
-      FOREIGN KEY(store_createdBy_fk_user_id) REFERENCES users(user_id)
+      FOREIGN KEY(store_fk_city_id) REFERENCES city(city_id),
+      FOREIGN KEY(store_createdBy_fk_user_id) REFERENCES user(user_id)
       );
       `);
 
     // Create reviews table
     await sequelize.query(`
-    CREATE TABLE IF NOT EXISTS reviews (
+    CREATE TABLE IF NOT EXISTS review (
       review_id INTEGER PRIMARY KEY AUTOINCREMENT,
       review_title TEXT NOT NULL,
       review_description TEXT NOT NULL,
       review_rating INTEGER NOT NULL,
       fk_user_id INTEGER NOT NULL,
       fk_store_id INTEGER NOT NULL,
-      FOREIGN KEY(fk_user_id) REFERENCES users(user_id),
-      FOREIGN KEY(fk_store_id) REFERENCES stores(store_id)
+      FOREIGN KEY(fk_user_id) REFERENCES user(user_id),
+      FOREIGN KEY(fk_store_id) REFERENCES store(store_id)
       );
       `);
 
     // Create USER
-    let userInsertQuery = `INSERT INTO users (username, email, password, role) VALUES `;
+    let userInsertQuery = `INSERT INTO user (username, email, password, role) VALUES `;
 
     let userInsertQueryVariables = [];
 
@@ -85,7 +85,7 @@ const snowsportsDb = async () => {
 
     //const [usersRes, metadata] = await sequelize.query("SELECT * FROM users");
 
-    let cityInsertQuery = "INSERT INTO cities (city_name) VALUES ";
+    let cityInsertQuery = "INSERT INTO city (city_name) VALUES ";
 
     let cityInsertQueryVariables = [];
 
@@ -108,7 +108,7 @@ const snowsportsDb = async () => {
 
     /*                         s                      */
     let storeInsertQuery =
-      "INSERT INTO stores (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id) VALUES ";
+      "INSERT INTO store (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id) VALUES ";
 
     let storeInsertQueryVariables = [];
 
@@ -137,7 +137,7 @@ const snowsportsDb = async () => {
     });
 
     let reviewInsertQuery =
-      "INSERT INTO reviews (review_title, review_description, review_rating, fk_user_id, fk_store_id) VALUES ";
+      "INSERT INTO review (review_title, review_description, review_rating, fk_user_id, fk_store_id) VALUES ";
 
     let reviewInsertQueryVariables = [];
 

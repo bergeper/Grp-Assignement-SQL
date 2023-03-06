@@ -1,7 +1,5 @@
 const { QueryTypes } = require("sequelize");
 const { userRoles } = require("../constants/users");
-const { user } = require("../data/users");
-const { stores } = require("../data/stores");
 const { sequelize } = require("../database/config");
 const { UnauthorizedError } = require("../utils/errors");
 
@@ -11,19 +9,19 @@ exports.getAllStores = async (req, res) => {
   console.log(city);
 
   if (!city) {
-    const [stores, metadata] = await sequelize.query(`
-  SELECT * FROM stores s 
+    const [store, metadata] = await sequelize.query(`
+  SELECT * FROM store s 
   `);
-    console.log(stores);
+    console.log(store);
     //  return res.send("här");
-    return res.json(stores);
+    return res.json(store);
   } else {
     const formattedCity = city.trim();
 
     const [results] = await sequelize.query(
       `SELECT s.store_id, s.store_name, c.city_name
-      FROM stores s 
-      LEFT JOIN cities c ON c.city_id = s.store_fk_city_id 
+      FROM store s 
+      LEFT JOIN city c ON c.city_id = s.store_fk_city_id 
       WHERE c.city_name = $city;`,
       {
         bind: { city: formattedCity },
@@ -40,7 +38,7 @@ exports.getStoreById = async (req, res) => {
 
   const [results, metadata] = await sequelize.query(
     `
-  SELECT store_id, store_name FROM stores s 
+  SELECT store_id, store_name FROM store s 
   WHERE store_id = $storeId
   `,
     {
@@ -51,9 +49,7 @@ exports.getStoreById = async (req, res) => {
   console.log("=================>" + results);
 
   if (!results || results.length == 0) {
-    throw new NotFoundError(
-      "We could not find the list you are looking for"
-    );
+    throw new NotFoundError("We could not find the list you are looking for");
   }
 
   return res.json(results);
@@ -64,7 +60,7 @@ exports.deleteStore = async (req, res) => {
 
   const [store, storeMeta] = await sequelize.query(
     `
-  SELECT * FROM stores
+  SELECT * FROM store
   WHERE store_id = $storeId  
   `,
     {
@@ -75,25 +71,17 @@ exports.deleteStore = async (req, res) => {
   const userId = store[0].store_createdBy_fk_user_id;
 
   if (req.user.role == userRoles.ADMIN || req.user.userId == userId) {
-    await sequelize.query(
-      `DELETE FROM reviews WHERE fk_store_id = $storeId`,
-      {
-        bind: { storeId: storeId },
-      }
-    );
+    await sequelize.query(`DELETE FROM reviews WHERE fk_store_id = $storeId`, {
+      bind: { storeId: storeId },
+    });
 
     console.log("true");
-    await sequelize.query(
-      `DELETE FROM stores WHERE store_Id = $storeId`,
-      {
-        bind: { storeId: storeId },
-      }
-    );
+    await sequelize.query(`DELETE FROM store WHERE store_Id = $storeId`, {
+      bind: { storeId: storeId },
+    });
     return res.send("hej");
   } else {
-    return res
-      .status(403)
-      .json("You are not authorized to delete this store");
+    return res.status(403).json("You are not authorized to delete this store");
   }
 };
 
@@ -103,14 +91,15 @@ exports.createNewStore = async (req, res) => {
     store_description,
     store_adress,
     store_zipcode,
-    store_fk_city_id,
-    store_createdBy_fk_user_id,
+    store_city,
   } = req.body;
   const userId = req.user.userId;
 
+  // INSERT INTO city,
+
   const [newStoreId] = await sequelize.query(
     `
-    INSERT INTO stores (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id)
+    INSERT INTO store (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id)
     VALUES ($store_name, $store_description, $store_adress, $store_zipcode, $store_fk_city_id, $store_createdBy_fk_user_id);
     `,
     {
@@ -119,8 +108,8 @@ exports.createNewStore = async (req, res) => {
         store_description: store_description,
         store_adress: store_adress,
         store_zipcode: store_zipcode,
-        store_fk_city_id: store_fk_city_id,
-        store_createdBy_fk_user_id: store_createdBy_fk_user_id,
+        store_fk_city_id: city.city_id,
+        store_createdBy_fk_user_id: userId,
       },
       type: QueryTypes.INSERT,
     }
@@ -129,7 +118,7 @@ exports.createNewStore = async (req, res) => {
   return res
     .setHeader(
       "Location",
-      `${req.protocol}://${req.headers.host}/api/v1/stores/${newStoreId.userId}`
+      `${req.protocol}://${req.headers.host}/api/v1/store/${newStoreId.userId}`
     )
     .sendStatus(201);
 };
@@ -141,7 +130,6 @@ exports.updateStoreById = async (req, res) => {
     store_adress,
     store_zipcode,
     store_fk_city_id,
-    store_createdBy_fk_user_id,
   } = req.body;
   const storeId = req.params.storeId;
   const userId = req.user.userId;
@@ -152,17 +140,14 @@ exports.updateStoreById = async (req, res) => {
     !store_description ||
     !store_adress ||
     !store_zipcode ||
-    !store_fk_city_id ||
-    !store_createdBy_fk_user_id
+    !store_fk_city_id
   ) {
-    throw new BadRequestError(
-      "You must enter values for each field."
-    );
+    throw new BadRequestError("You must enter values for each field.");
   }
 
   const store = await sequelize.query(
     `
-  SELECT * FROM stores
+  SELECT * FROM store
   WHERE store_id = $storeId  
   `,
     {
@@ -171,15 +156,14 @@ exports.updateStoreById = async (req, res) => {
     }
   );
 
-  if (store.length <= 0)
-    throw new UnauthorizedError("Store does not exist.");
+  if (store.length <= 0) throw new UnauthorizedError("Store does not exist.");
 
   if (userRole == userRoles.ADMIN || userId == review[0].fk_user_id) {
     const [updatedStore] = await sequelize.query(
       `
-    UPDATE stores SET store_name = $store_name, store_description = $store_description, 
+    UPDATE store SET store_name = $store_name, store_description = $store_description, 
     store_adress = $store_adress, store_zipcode = $store_zipcode, 
-    store_fk_city_id = $store_fk_city_id, store_createdBy_fk_user_id = $store_createdBy_fk_user_id 
+    store_fk_city_id = $store_fk_city_id
     WHERE store_id = $storeId;
     RETURNING *;
     `,
@@ -190,7 +174,7 @@ exports.updateStoreById = async (req, res) => {
           store_adress: store_adress,
           store_zipcode: store_zipcode,
           store_fk_city_id: store_fk_city_id,
-          store_createdBy_fk_user_id: store_createdBy_fk_user_id,
+          storeId: storeId,
         },
         type: QueryTypes.UPDATE,
       }
@@ -199,7 +183,7 @@ exports.updateStoreById = async (req, res) => {
     return res.json(updatedStore);
   } else {
     throw new UnauthorizedError(
-      "Your trying to delete a store created by another user."
+      "Your trying to update a store created by another user."
     );
   }
 };
