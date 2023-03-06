@@ -41,10 +41,11 @@ exports.login = async (req, res) => {
   if (!user) throw new UnauthenticatedError("Invalid Credentials");
 
   const isPasswordCorrect = await bcrypt.compare(
-    canditatePassword,
-    user.password
+    canditatePassword, // Det user skriver in
+    user.password // det som finns i databasen
   );
-  if (!isPasswordCorrect) throw new UnauthenticatedError("Invalid Credentials");
+  if (!isPasswordCorrect)
+    throw new UnauthenticatedError("Invalid Credentials");
 
   const jwtPayload = {
     userId: user.user_id,
