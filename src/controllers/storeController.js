@@ -165,7 +165,6 @@ exports.createNewStore = async (req, res) => {
 
   if (cityAlreadyExists) {
     cityId = cityAlreadyExists.city_id;
-    console.log(cityAlreadyExists.city_id);
   } else {
     const newCityId = await sequelize.query(
       `
