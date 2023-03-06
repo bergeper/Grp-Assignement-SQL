@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { isAuthenticated } = require("../middleware/authenticationMiddleware");
 const {
-  getAllReviews,
   getReviewById,
   createNewReview,
   deleteReviewById,
@@ -11,7 +10,6 @@ const {
 const { reviewSchema } = require("../middleware/validation/validationSchemas");
 const { validate } = require("../middleware/validation/validationMiddleware");
 
-router.get("/", getAllReviews);
 router.get("/:reviewId", getReviewById);
 router.post(
   "/:storeId",
