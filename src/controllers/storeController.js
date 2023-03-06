@@ -1,7 +1,11 @@
 const { QueryTypes } = require("sequelize");
 const { userRoles } = require("../constants/users");
 const { sequelize } = require("../database/config");
-const { UnauthorizedError } = require("../utils/errors");
+const {
+  UnauthorizedError,
+  NotFoundError,
+  BadRequestError,
+} = require("../utils/errors");
 
 exports.getAllStores = async (req, res) => {
   const city = req.query.city;
@@ -13,22 +17,23 @@ exports.getAllStores = async (req, res) => {
   if (!city) {
     const [store, metadata] = await sequelize.query(
       `
-  SELECT * FROM store s LIMIT $limit OFFSET $offset
+  SELECT * FROM store s ORDER by store_name ASC, LIMIT $limit OFFSET $offset
   `,
       {
         bind: { limit: limit, offset: offset },
       }
     );
     console.log(store);
-    //  return res.send("här");
+
+    if (!store || store[0]) {
+      throw new NotFoundError("sorry, we can't find any stores");
+    }
     return res.json(store);
   } else {
     const formattedCity = city.trim();
 
-    // vill få tillbaka lite fler saker.
-
     const [results] = await sequelize.query(
-      `SELECT s.store_id, s.store_name, c.city_name
+      `SELECT *
       FROM store s 
       LEFT JOIN city c ON c.city_id = s.store_fk_city_id 
       WHERE c.city_name = $city
@@ -38,6 +43,11 @@ exports.getAllStores = async (req, res) => {
         bind: { city: formattedCity, limit: limit, offset: offset },
       }
     );
+    if (!store || store[0]) {
+      throw new NotFoundError(
+        "sorry, we can't find any stores listed in that city"
+      );
+    }
 
     return res.json(results);
   }
@@ -134,44 +144,60 @@ exports.createNewStore = async (req, res) => {
   } = req.body;
   const userId = req.user.userId;
 
-  const [newCityId] = await sequelize.query(
-    `
-  INSERT INTO city (city_name) VALUES ($store_city);
-  `,
-    {
-      bind: {
-        store_city: store_city,
-      },
-      type: QueryTypes.INSERT,
-    }
-  );
-
-  console.log(newCityId);
-
-  const [newStoreId] = await sequelize.query(
-    `
-    INSERT INTO store (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id)
-    VALUES ($store_name, $store_description, $store_adress, $store_zipcode, $store_fk_city_id, $store_createdBy_fk_user_id);
-    `,
+  const [storeAlreadyInDatabase] = await sequelize.query(
+    `SELECT store_name FROM store 
+  WHERE store_name = $store_name AND store_city = $store_city;`,
     {
       bind: {
         store_name: store_name,
-        store_description: store_description,
-        store_adress: store_adress,
-        store_zipcode: store_zipcode,
-        store_fk_city_id: newCityId,
-        store_createdBy_fk_user_id: userId,
+        store_city: store_city,
       },
-      type: QueryTypes.INSERT,
+      type: QueryTypes.SELECT,
     }
   );
 
-  return res
-    .setHeader(
-      "Location",
-      `${req.protocol}://${req.headers.host}/api/v1/store/${newStoreId.userId}`
-    )
-    .sendStatus(201);
+  if (storeAlreadyInDatabase) {
+    throw BadRequestError("That store already exists");
+  } else {
+    const [newCityId] = await sequelize.query(
+      `
+  INSERT INTO city (city_name) VALUES ($store_city);
+  `,
+      {
+        bind: {
+          store_city: store_city,
+        },
+        type: QueryTypes.INSERT,
+      }
+    );
+
+    console.log(newCityId);
+
+    const [newStoreId] = await sequelize.query(
+      `
+    INSERT INTO store (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id)
+    VALUES ($store_name, $store_description, $store_adress, $store_zipcode, $store_fk_city_id, $store_createdBy_fk_user_id);
+    `,
+      {
+        bind: {
+          store_name: store_name,
+          store_description: store_description,
+          store_adress: store_adress,
+          store_zipcode: store_zipcode,
+          store_fk_city_id: newCityId,
+          store_createdBy_fk_user_id: userId,
+        },
+        type: QueryTypes.INSERT,
+      }
+    );
+
+    return res
+      .setHeader(
+        "Location",
+        `${req.protocol}://${req.headers.host}/api/v1/store/${newStoreId.userId}`
+      )
+      .sendStatus(201);
+  }
 };
 
 exports.updateStoreById = async (req, res) => {
