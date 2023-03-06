@@ -84,7 +84,7 @@ exports.getStoreById = async (req, res) => {
   );
 
   if (!store || store.length == 0) {
-    throw new NotFoundError("We could not find the list you are looking for");
+    throw new NotFoundError("We could not find the store you are looking for.");
   }
 
   const response = {
@@ -134,10 +134,12 @@ exports.createNewStore = async (req, res) => {
   } = req.body;
   const userId = req.user.userId;
 
-  const [storeAlreadyInDatabase] = await sequelize.query(
+  const [exists] = await sequelize.query(
     `
-    SELECT s.store_name FROM store s
+    SELECT s.store_name
+    FROM store s
     WHERE s.store_name = $store_name
+    
     `,
     {
       bind: {
@@ -147,13 +149,15 @@ exports.createNewStore = async (req, res) => {
     }
   );
 
-  if (storeAlreadyInDatabase)
-    throw new BadRequestError("That store already exists");
+  if (exists)
+    throw new BadRequestError(
+      "That store already exists, go ahead and make a review for it!"
+    );
 
   const [cityAlreadyExists] = await sequelize.query(
     `
-      SELECT city_id FROM city
-      WHERE city_name = $store_city
+    SELECT city_id FROM city
+    WHERE city_name = $store_city
       `,
     {
       bind: { store_city: store_city },
