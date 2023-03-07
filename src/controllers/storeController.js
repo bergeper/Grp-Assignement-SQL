@@ -17,8 +17,8 @@ exports.getAllStores = async (req, res) => {
   if (!city) {
     const [store, metadata] = await sequelize.query(
       `
-  SELECT * FROM store s ORDER by store_name ASC, LIMIT $limit OFFSET $offset
-  `,
+    SELECT * FROM store s ORDER by store_name ASC, LIMIT $limit OFFSET $offset
+    `,
       {
         bind: { limit: limit, offset: offset },
       }
@@ -26,7 +26,7 @@ exports.getAllStores = async (req, res) => {
     console.log(store);
 
     if (!store || store[0]) {
-      throw new NotFoundError("sorry, we can't find any stores");
+      throw new NotFoundError("sorry, we can't find any stores😢");
     }
     return res.json(store);
   } else {
@@ -45,7 +45,7 @@ exports.getAllStores = async (req, res) => {
     );
     if (!store || store[0]) {
       throw new NotFoundError(
-        "sorry, we can't find any stores listed in that city"
+        "sorry, we can't find any stores listed in that city😢"
       );
     }
 
@@ -84,7 +84,7 @@ exports.getStoreById = async (req, res) => {
   );
 
   if (!store || store.length == 0) {
-    throw new NotFoundError("We could not find the store you are looking for.");
+    throw new NotFoundError("We could not find the store you are looking for.😢");
   }
 
   const response = {
@@ -120,7 +120,7 @@ exports.deleteStore = async (req, res) => {
     });
     return res.send("hej");
   } else {
-    return res.status(403).json("You are not authorized to delete this store");
+    return res.status(403).json("You are not authorized to delete this store😵");
   }
 };
 
