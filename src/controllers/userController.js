@@ -1,6 +1,9 @@
 // kunna skapa user och hämta alla user, hämta user baserat på id, ta bort id (usern själv och admin)
 const { users } = require("../data/users");
-const { NotFoundError, UnauthorizedError } = require("../utils/errors");
+const {
+  NotFoundError,
+  UnauthorizedError,
+} = require("../utils/errors");
 const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
 
@@ -27,44 +30,45 @@ exports.getUserById = async (req, res) => {
   return res.json(user);
 };
 
+//CREATE
+exports.createNewUser = async (req, res) => {
+  const userId = req.params.userId;
+  return res.send("createNewUser");
+};
 
-  //CREATE
-  exports.createNewUser = async (req, res) => {
-    const userId = req.params.userId;
-    return res.send("createNewUser");
-  };
-
-  //UPDATE
-  exports.updateUserById = async (req, res) => {
-    return res.send("updateUserById")
-  }
+//UPDATE
+exports.updateUserById = async (req, res) => {
+  return res.send("updateUserById");
+};
 
 //DELETE
 exports.deleteUserById = async (req, res) => {
   const userId = req.params.userId;
   console.log(userId);
 
-  if ( req.user.role == userRoles.ADMIN || req.user.userId == userId ) {
-    const review = await sequelize.query (
+  if (req.user.role == userRoles.ADMIN || req.user.userId == userId) {
+    const review = await sequelize.query(
       `DELETE FROM review WHERE fk_user_id = $userId;`,
-   {
-    bind: { userId: userId },
-      type: QueryTypes.DELETE,
-   }
-);
+      {
+        bind: { userId: userId },
+        type: QueryTypes.DELETE,
+      }
+    );
 
 //update store_id 
 
-  const user = await sequelize.query(
-    `UPDATE store SET store_id = $storeId; 
+    const user = await sequelize.query(
+      `UPDATE store SET store_id = $storeId; 
      DELETE FROM user WHERE user_id = $userId;`,
-    {
-      bind: { userId: userId },
-      type: QueryTypes.DELETE,
-    }
-  );
-} else {
-    throw new UnauthorizedError("You don't have permission to delete this user 😢");
+      {
+        bind: { userId: userId },
+        type: QueryTypes.DELETE,
+      }
+    );
+  } else {
+    throw new UnauthorizedError(
+      "You don't have permission to delete this user 😢"
+    );
   }
   return res.sendStatus(204);
 };
