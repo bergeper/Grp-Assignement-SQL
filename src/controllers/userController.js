@@ -6,7 +6,7 @@ const { QueryTypes } = require("sequelize");
 
 exports.getAllUsers = async (req, res) => {
   const [users, metadata] = await sequelize.query(
-    "SELECT username, password, email FROM users"
+    "SELECT username, password, email, role FROM users"
   );
   return res.json(users);
 };
@@ -53,7 +53,7 @@ exports.deleteUserById = async (req, res) => {
    }
 );
 
-//updatere store_id 
+//update store_id 
 
   const user = await sequelize.query(
     `UPDATE store SET store_id = $storeId; 
