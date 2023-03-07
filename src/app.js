@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: ["http://localhost:3000"],
-    methods: ["GET", "PUT", "POST", "PATCH", "DELETE"],
+    methods: ["GET", "PUT", "POST", "DELETE"],
   })
 );
 app.use(xss());
