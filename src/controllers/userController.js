@@ -43,8 +43,8 @@ exports.updateUserById = async (req, res) => {
 
 //DELETE
 exports.deleteUserById = async (req, res) => {
-  const userId = req.params.userId;
-  console.log(userId);
+  const storeId = req.params.storeId;
+  const userId = req.user.userId;
 
   if (req.user.role == userRoles.ADMIN || req.user.userId == userId) {
     const review = await sequelize.query(
@@ -55,11 +55,18 @@ exports.deleteUserById = async (req, res) => {
       }
     );
 
-//update store_id 
+    const updatedCreator = await sequelize.query(
+      `
+        UPDATE store SET fstore_createdBy_fk_user_id = '1' 
+        WHERE fstore_createdBy_fk_user_id = $userId;`,
+      {
+        bind: { userId: userId },
+        type: QueryTypes.UPDATE,
+      }
+    );
 
     const user = await sequelize.query(
-      `UPDATE store SET store_id = $storeId; 
-     DELETE FROM user WHERE user_id = $userId;`,
+      `DELETE FROM user WHERE user_id = $userId;`,
       {
         bind: { userId: userId },
         type: QueryTypes.DELETE,
