@@ -1,5 +1,5 @@
 // kunna skapa user och hämta alla user, hämta user baserat på id, ta bort id (usern själv och admin)
-const { users } = require("../data/users");
+const { userRoles } = require("../constants/users");
 const {
   NotFoundError,
   UnauthorizedError,
@@ -45,9 +45,10 @@ exports.updateUserById = async (req, res) => {
 exports.deleteUserById = async (req, res) => {
   const storeId = req.params.storeId;
   const userId = req.user.userId;
+  const userRole = req.user.role;
 
-  if (req.user.role == userRoles.ADMIN || req.user.userId == userId) {
-    const review = await sequelize.query(
+  if (userRole == userRoles.ADMIN || userId == req.user.userId) {
+    await sequelize.query(
       `DELETE FROM review WHERE fk_user_id = $userId;`,
       {
         bind: { userId: userId },
@@ -55,17 +56,18 @@ exports.deleteUserById = async (req, res) => {
       }
     );
 
-    const updatedCreator = await sequelize.query(
+    await sequelize.query(
       `
-        UPDATE store SET fstore_createdBy_fk_user_id = '1' 
-        WHERE fstore_createdBy_fk_user_id = $userId;`,
+        UPDATE store SET store_createdBy_fk_user_id = '1' 
+        WHERE store_createdBy_fk_user_id = $userId
+        RETURNING *;`,
       {
         bind: { userId: userId },
         type: QueryTypes.UPDATE,
       }
     );
 
-    const user = await sequelize.query(
+    await sequelize.query(
       `DELETE FROM user WHERE user_id = $userId;`,
       {
         bind: { userId: userId },
