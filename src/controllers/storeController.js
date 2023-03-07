@@ -12,20 +12,17 @@ exports.getAllStores = async (req, res) => {
   const limit = req.query?.limit || 10;
   const offset = req.query?.offset || 0;
 
-  console.log(city);
-
   if (!city) {
     const [store, metadata] = await sequelize.query(
       `
-    SELECT * FROM store s ORDER by store_name ASC, LIMIT $limit OFFSET $offset
+    SELECT * FROM store s ORDER BY store_name ASC LIMIT $limit OFFSET $offset
     `,
       {
         bind: { limit: limit, offset: offset },
       }
     );
     console.log(store);
-
-    if (!store || store[0]) {
+    if (store.length < 0) {
       throw new NotFoundError("sorry, we can't find any stores😢");
     }
     return res.json(store);
@@ -84,7 +81,9 @@ exports.getStoreById = async (req, res) => {
   );
 
   if (!store || store.length == 0) {
-    throw new NotFoundError("We could not find the store you are looking for.😢");
+    throw new NotFoundError(
+      "We could not find the store you are looking for.😢"
+    );
   }
 
   const response = {
@@ -120,7 +119,9 @@ exports.deleteStore = async (req, res) => {
     });
     return res.send("hej");
   } else {
-    return res.status(403).json("You are not authorized to delete this store😵");
+    return res
+      .status(403)
+      .json("You are not authorized to delete this store😵");
   }
 };
 
@@ -136,40 +137,60 @@ exports.createNewStore = async (req, res) => {
 
   const [exists] = await sequelize.query(
     `
-    SELECT s.store_name
-    FROM store s
-    WHERE s.store_name = $store_name
+    SELECT s.store_name, c.city_name, c.city_id
+    FROM city c
+    LEFT JOIN store s ON s.store_name = $store_name
+    AND s.store_fk_city_id = c.city_id
+    WHERE c.city_name = $store_city
     
     `,
     {
       bind: {
         store_name: store_name,
+        store_city: store_city,
       },
       type: QueryTypes.SELECT,
     }
   );
-
-  if (exists)
+  /*
+    if (exists)
     throw new BadRequestError(
       "That store already exists, go ahead and make a review for it!"
-    );
+      );
 
-  const [cityAlreadyExists] = await sequelize.query(
+      const [cityAlreadyExists] = await sequelize.query(
     `
     SELECT city_id FROM city
     WHERE city_name = $store_city
       `,
-    {
+      {
       bind: { store_city: store_city },
       type: QueryTypes.SELECT,
     }
   );
-
+  */
+  /*
+ if (cityAlreadyExists) {
+   cityId = cityAlreadyExists.city_id;
+ } else {
+   const newCityId = await sequelize.query(
+     `
+     INSERT INTO city (city_name) VALUES ($store_city);
+     `,
+     {
+       bind: {
+         store_city: store_city,
+       },
+       type: QueryTypes.INSERT,
+     }
+     );
+     cityId = newCityId.city_id;
+   }
+   
+  */
   let cityId;
-
-  if (cityAlreadyExists) {
-    cityId = cityAlreadyExists.city_id;
-  } else {
+  console.log(exists);
+  if (!exists) {
     const newCityId = await sequelize.query(
       `
       INSERT INTO city (city_name) VALUES ($store_city);
@@ -183,7 +204,6 @@ exports.createNewStore = async (req, res) => {
     );
     cityId = newCityId.city_id;
   }
-
   const [newStoreId] = await sequelize.query(
     `
     INSERT INTO store (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id)
