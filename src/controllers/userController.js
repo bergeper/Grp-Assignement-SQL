@@ -17,25 +17,9 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
   const userId = req.params.userId;
 
-  const [user, metadata] = await sequelize.query(
-    "SELECT user_id, email, name FROM users WHERE user_id = $userId",
-    {
-      bind: { userId },
-      type: QueryTypes.SELECT,
-    }
-  );
-
-  if (!user) throw new NotFoundError("That user does not exist 😢");
-
-  return res.json(user);
-};
-
-exports.getStoreById = async (req, res) => {
-  const userId = req.params.userId;
-
   const [user] = await sequelize.query(
     `
-  SELECT user_id, user_name FROM user u
+  SELECT * FROM user u
   WHERE user_id = $userId
   `,
     {
@@ -43,37 +27,35 @@ exports.getStoreById = async (req, res) => {
       type: QueryTypes.SELECT,
     }
   );
-  /************************* fortsätt här nedan (junita) ********/
+
   const reviews = await sequelize.query(
     `
   SELECT r.review_id, r.review_title, r.review_description, r.review_rating, u.username
   FROM review r
-  JOIN user u ON s.store_id = r.fk_store_id
   JOIN store s ON u.user_id = r.fk_user_id
-  WHERE s.store_id = $storeId
+  JOIN user u ON s.store_id = r.fk_store_id
+  WHERE user_id = $userId
   `,
     {
       bind: {
-        storeId: storeId,
+        userId: userId,
       },
       type: QueryTypes.SELECT,
     }
   );
 
-  if (!store || store.length == 0) {
+  if (!user || user.length == 0) {
     throw new NotFoundError(
-      "We could not find the store you are looking for.😢"
+      "We could not find the user you are looking for.😢"
     );
   }
 
   const response = {
-    store: store,
+    user: user,
     reviews: reviews,
   };
   return res.json(response);
 };
-
-//  alla dens rewievs
 
 //UPDATE
 exports.updateUserById = async (req, res) => {
