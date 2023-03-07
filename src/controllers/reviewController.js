@@ -12,11 +12,12 @@ exports.getReviewById = async (req, res) => {
 
   const [results] = await sequelize.query(
     `
-  SELECT * FROM review s 
-  WHERE review_id = $reviewId
-  `,
+    SELECT * FROM review s 
+    WHERE review_id = $reviewId
+    `,
     {
       bind: { reviewId: reviewId },
+      type: QueryTypes.SELECT,
     }
   );
 
