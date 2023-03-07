@@ -22,7 +22,7 @@ Express
 
 ## INSTALLATION
 
-1. Clone this repo, in your terminal run the following command : git clone https://github.com/bergeper/Grp-Assignement-SQL.git
+1. Clone this repo, in your terminal run the following command : git clone "https://github.com/bergeper/Grp-Assignement-SQL.git"
 2. Install all npm packages needed, in your terminal run the following command : npm i
 3. Seed your SQLite database with all data, in your terminal run the following command : npm run seedDB
 4. Start server, in your terminal run the following command : npm run dev
@@ -35,21 +35,21 @@ Express
 ## USERS
 
 username: "AdminPerra",
-password: "apa123",
+password: "hej123",
 email: "per@gmail.com",
 role: "ADMIN",
 
 username: "Junita",
-password: "lus123",
+password: "hej123",
 email: "junita@gmail.com",
 role: "USER",
 
 username: "Ida",
-password: "mus123",
+password: "hej123",
 email: "ida@gmail.com",
 role: "USER",
 
 username: "Adam",
-password: "korv123",
+password: "hej123",
 email: "adam@gmail.com",
 role: "USER",
