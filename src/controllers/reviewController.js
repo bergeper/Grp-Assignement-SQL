@@ -72,7 +72,7 @@ exports.deleteReviewById = async (req, res) => {
     );
     return res.sendStatus(204);
   } else {
-    throw new UnauthorizedError("You are not allowed to delete this review.");
+    throw new UnauthorizedError("You are not allowed to delete this review😵");
   }
 };
 
@@ -83,7 +83,7 @@ exports.updateReviewById = async (req, res) => {
   const userRole = req.user.role;
 
   if (!review_description || !review_title || !review_rating) {
-    throw new BadRequestError("You must enter values for each field.");
+    throw new BadRequestError("You must enter values for each field⚠️");
   }
 
   const review = await sequelize.query(
