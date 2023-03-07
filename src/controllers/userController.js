@@ -1,8 +1,8 @@
-// kunna skapa user och hämta alla user, hämta user baserat på id, ta bort id (usern själv och admin)
 const { userRoles } = require("../constants/users");
 const {
   NotFoundError,
   UnauthorizedError,
+  BadRequestError,
 } = require("../utils/errors");
 const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
@@ -59,12 +59,49 @@ exports.getUserById = async (req, res) => {
 
 //UPDATE
 exports.updateUserById = async (req, res) => {
-  return res.send("updateUserById");
+  const { username, email, password } = req.body;
+
+  const userId = req.user.userId;
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedpassword = await bcrypt.hash(password, salt);
+
+  if (!password || !username) {
+    throw new BadRequestError(
+      "you must write username and password!"
+    );
+  }
+  const user = await sequelize.query(
+    `SELECT * FROM user
+    WHERE user_id = $userId`,
+    {
+      bind: { storeId: storeId },
+      type: QueryTypes.SELECT,
+    }
+  );
+
+  if (user.length <= 0)
+    throw new BadRequestError("This user doesn't exist");
+
+  const [updatedUser] = await sequelize.query(
+    `
+    UPDATE user SET email = $email, password = $password, username = $username 
+    WHERE user_id = $storeId;
+    RETURNING *;
+    `,
+    {
+      bind: {
+        email: email,
+        password: hashedpassword,
+        username: username,
+      },
+      type: QueryTypes.UPDATE,
+    }
+  );
+  return res.send(updatedUser);
 };
 
-//DELETE
 exports.deleteUserById = async (req, res) => {
-  const storeId = req.params.storeId;
   const userId = req.user.userId;
   const userRole = req.user.role;
 
