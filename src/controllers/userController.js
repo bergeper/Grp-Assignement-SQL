@@ -30,11 +30,50 @@ exports.getUserById = async (req, res) => {
   return res.json(user);
 };
 
-//CREATE
-exports.createNewUser = async (req, res) => {
+exports.getStoreById = async (req, res) => {
   const userId = req.params.userId;
-  return res.send("createNewUser");
+
+  const [user] = await sequelize.query(
+    `
+  SELECT user_id, user_name FROM user u
+  WHERE user_id = $userId
+  `,
+    {
+      bind: { userId: userId },
+      type: QueryTypes.SELECT,
+    }
+  );
+  /************************* fortsätt här nedan (junita) ********/
+  const reviews = await sequelize.query(
+    `
+  SELECT r.review_id, r.review_title, r.review_description, r.review_rating, u.username
+  FROM review r
+  JOIN user u ON s.store_id = r.fk_store_id
+  JOIN store s ON u.user_id = r.fk_user_id
+  WHERE s.store_id = $storeId
+  `,
+    {
+      bind: {
+        storeId: storeId,
+      },
+      type: QueryTypes.SELECT,
+    }
+  );
+
+  if (!store || store.length == 0) {
+    throw new NotFoundError(
+      "We could not find the store you are looking for.😢"
+    );
+  }
+
+  const response = {
+    store: store,
+    reviews: reviews,
+  };
+  return res.json(response);
 };
+
+//  alla dens rewievs
 
 //UPDATE
 exports.updateUserById = async (req, res) => {
