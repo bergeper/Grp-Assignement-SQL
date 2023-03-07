@@ -84,9 +84,7 @@ exports.getStoreById = async (req, res) => {
   );
 
   if (!store || store.length == 0) {
-    throw new NotFoundError(
-      "We could not find the list you are looking for"
-    );
+    throw new NotFoundError("We could not find the store you are looking for.");
   }
 
   const response = {
@@ -112,25 +110,17 @@ exports.deleteStore = async (req, res) => {
   const userId = store[0].store_createdBy_fk_user_id;
 
   if (req.user.role == userRoles.ADMIN || req.user.userId == userId) {
-    await sequelize.query(
-      `DELETE FROM reviews WHERE fk_store_id = $storeId`,
-      {
-        bind: { storeId: storeId },
-      }
-    );
+    await sequelize.query(`DELETE FROM reviews WHERE fk_store_id = $storeId`, {
+      bind: { storeId: storeId },
+    });
 
     console.log("true");
-    await sequelize.query(
-      `DELETE FROM store WHERE store_Id = $storeId`,
-      {
-        bind: { storeId: storeId },
-      }
-    );
+    await sequelize.query(`DELETE FROM store WHERE store_Id = $storeId`, {
+      bind: { storeId: storeId },
+    });
     return res.send("hej");
   } else {
-    return res
-      .status(403)
-      .json("You are not authorized to delete this store");
+    return res.status(403).json("You are not authorized to delete this store");
   }
 };
 
@@ -144,25 +134,46 @@ exports.createNewStore = async (req, res) => {
   } = req.body;
   const userId = req.user.userId;
 
-  const [storeAlreadyInDatabase] = await sequelize.query(
-    `SELECT store_name FROM store 
-  WHERE store_name = $store_name AND store_city = $store_city;`,
+  const [exists] = await sequelize.query(
+    `
+    SELECT s.store_name
+    FROM store s
+    WHERE s.store_name = $store_name
+    
+    `,
     {
       bind: {
         store_name: store_name,
-        store_city: store_city,
       },
       type: QueryTypes.SELECT,
     }
   );
 
-  if (storeAlreadyInDatabase) {
-    throw BadRequestError("That store already exists");
+  if (exists)
+    throw new BadRequestError(
+      "That store already exists, go ahead and make a review for it!"
+    );
+
+  const [cityAlreadyExists] = await sequelize.query(
+    `
+    SELECT city_id FROM city
+    WHERE city_name = $store_city
+      `,
+    {
+      bind: { store_city: store_city },
+      type: QueryTypes.SELECT,
+    }
+  );
+
+  let cityId;
+
+  if (cityAlreadyExists) {
+    cityId = cityAlreadyExists.city_id;
   } else {
-    const [newCityId] = await sequelize.query(
+    const newCityId = await sequelize.query(
       `
-  INSERT INTO city (city_name) VALUES ($store_city);
-  `,
+      INSERT INTO city (city_name) VALUES ($store_city);
+      `,
       {
         bind: {
           store_city: store_city,
@@ -170,34 +181,33 @@ exports.createNewStore = async (req, res) => {
         type: QueryTypes.INSERT,
       }
     );
+    cityId = newCityId.city_id;
+  }
 
-    console.log(newCityId);
-
-    const [newStoreId] = await sequelize.query(
-      `
+  const [newStoreId] = await sequelize.query(
+    `
     INSERT INTO store (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id)
     VALUES ($store_name, $store_description, $store_adress, $store_zipcode, $store_fk_city_id, $store_createdBy_fk_user_id);
     `,
-      {
-        bind: {
-          store_name: store_name,
-          store_description: store_description,
-          store_adress: store_adress,
-          store_zipcode: store_zipcode,
-          store_fk_city_id: newCityId,
-          store_createdBy_fk_user_id: userId,
-        },
-        type: QueryTypes.INSERT,
-      }
-    );
+    {
+      bind: {
+        store_name: store_name,
+        store_description: store_description,
+        store_adress: store_adress,
+        store_zipcode: store_zipcode,
+        store_fk_city_id: cityId,
+        store_createdBy_fk_user_id: userId,
+      },
+      type: QueryTypes.INSERT,
+    }
+  );
 
-    return res
-      .setHeader(
-        "Location",
-        `${req.protocol}://${req.headers.host}/api/v1/store/${newStoreId.userId}`
-      )
-      .sendStatus(201);
-  }
+  return res
+    .setHeader(
+      "Location",
+      `${req.protocol}://${req.headers.host}/api/v1/stores/${newStoreId}`
+    )
+    .sendStatus(201);
 };
 
 exports.updateStoreById = async (req, res) => {
@@ -219,9 +229,7 @@ exports.updateStoreById = async (req, res) => {
     !store_zipcode ||
     !store_fk_city_id
   ) {
-    throw new BadRequestError(
-      "You must enter values for each field."
-    );
+    throw new BadRequestError("You must enter values for each field.");
   }
 
   const store = await sequelize.query(
@@ -235,8 +243,7 @@ exports.updateStoreById = async (req, res) => {
     }
   );
 
-  if (store.length <= 0)
-    throw new UnauthorizedError("Store does not exist.");
+  if (store.length <= 0) throw new UnauthorizedError("Store does not exist.");
 
   if (userRole == userRoles.ADMIN || userId == review[0].fk_user_id) {
     const [updatedStore] = await sequelize.query(

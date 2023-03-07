@@ -1,9 +1,21 @@
+<<<<<<< HEAD
+ // kunna skapa user och hämta alla user, hämta user baserat på id, ta bort id (usern själv och admin)
+const { user } = require("../data/users");
+=======
+>>>>>>> d31e64b8ea683d768b74a26f9517bb21c2c6ea09
 const { NotFoundError, UnauthorizedError } = require("../utils/errors");
 const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
 
+<<<<<<< HEAD
+exports.getAllUsers = async (req, res) => { //admin 
+  const [users, metadata] = await sequelize.query(
+    "SELECT username, password, email FROM users"
+  );
+=======
 exports.getAllUsers = async (req, res) => {
   const [users, metadata] = await sequelize.query("SELECT * FROM user");
+>>>>>>> d31e64b8ea683d768b74a26f9517bb21c2c6ea09
   return res.json(users);
 };
 
@@ -24,15 +36,20 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.deleteUserById = async (req, res) => {
-  // Grab the user id and place in local variable
   const userId = req.params.userId;
 
+<<<<<<< HEAD
+  if (
+    userId != req.user?.userId &&
+    req.user.role !== userRoles.ADMIN
+  ) {
+=======
   // Check if user is admin || user is requesting to delete themselves
   if (userId != req.user?.userId && req.user.role !== userRoles.ADMIN) {
+>>>>>>> d31e64b8ea683d768b74a26f9517bb21c2c6ea09
     throw new UnauthorizedError("Unauthorized Access");
   }
 
-  // Delete the user from the database
   const [results, metadata] = await sequelize.query(
     "DELETE FROM user WHERE id = $userId RETURNING *",
     {
@@ -40,7 +57,6 @@ exports.deleteUserById = async (req, res) => {
     }
   );
 
-  // Not found error (ok since since route is authenticated)
   if (!results || !results[0])
     throw new NotFoundError("That user does not exist");
 
@@ -48,6 +64,5 @@ exports.deleteUserById = async (req, res) => {
     bind: { userId: userId },
   });
 
-  // Send back user info
   return res.sendStatus(204);
 };
