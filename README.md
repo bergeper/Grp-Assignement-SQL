@@ -16,8 +16,8 @@ Ida Lindgren
 
 ### Built With
 
-node.js
 SQLite
+node.js
 Express
 
 ## INSTALLATION
@@ -30,7 +30,7 @@ Express
 
 ## Database Design
 
-
+![database](./dbDesign/MicrosoftTeams-image%20(3).png)
 
 ## USERS
 
