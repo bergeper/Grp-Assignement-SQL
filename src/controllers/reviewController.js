@@ -97,7 +97,8 @@ exports.updateReviewById = async (req, res) => {
     }
   );
 
-  if (review.length <= 0) throw new UnauthorizedError("Review does not exist.");
+  if (review.length <= 0)
+    throw new UnauthorizedError("Review does not exist😢");
 
   if (userRole == userRoles.ADMIN || userId == review[0].fk_user_id) {
     const [updateReview] = await sequelize.query(
@@ -120,7 +121,7 @@ exports.updateReviewById = async (req, res) => {
     return res.json(updateReview);
   } else {
     throw new UnauthorizedError(
-      "Your trying to update a review created by another user."
+      "Your trying to update a review created by another user⚠️"
     );
   }
 };
