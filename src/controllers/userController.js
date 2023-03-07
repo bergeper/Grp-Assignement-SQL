@@ -1,4 +1,4 @@
- // kunna skapa user och hämta alla user, hämta user baserat på id, ta bort id (usern själv och admin)
+// kunna skapa user och hämta alla user, hämta user baserat på id, ta bort id (usern själv och admin)
 const { users } = require("../data/users");
 const { NotFoundError, UnauthorizedError } = require("../utils/errors");
 const { sequelize } = require("../database/config");
