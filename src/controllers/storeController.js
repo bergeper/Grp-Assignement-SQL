@@ -135,13 +135,6 @@ exports.createNewStore = async (req, res) => {
   } = req.body;
   const userId = req.user.userId;
   let cityId;
-  /*
-  SELECT s.store_name, s.store_id, c.city_name, c.city_id
-    FROM city c
-    LEFT JOIN store s ON s.store_fk_city_id = c.city_id
-    WHERE c.city_name = $store_city AND s.store_name = $store_name;
-  
-  */
 
   const [exists] = await sequelize.query(
     `
