@@ -140,8 +140,8 @@ exports.createNewStore = async (req, res) => {
     `
     SELECT s.store_name, s.store_id, c.city_name, c.city_id
     FROM city c
-    LEFT JOIN store s ON s.store_fk_city_id = c.city_id
-    WHERE c.city_name = $store_city AND s.store_name = $store_name;
+    LEFT JOIN store s ON s.store_name = $store_name AND s.store_fk_city_id = c.city_id 
+    WHERE c.city_name = $store_city 
     `,
     {
       bind: {
@@ -151,47 +151,9 @@ exports.createNewStore = async (req, res) => {
       type: QueryTypes.SELECT,
     }
   );
-  /*
-    if (exists)
-    throw new BadRequestError(
-      "That store already exists, go ahead and make a review for it!"
-      );
+  console.log(exists);
 
-      const [cityAlreadyExists] = await sequelize.query(
-    `
-    SELECT city_id FROM city
-    WHERE city_name = $store_city
-      `,
-      {
-      bind: { store_city: store_city },
-      type: QueryTypes.SELECT,
-    }
-  );
-  */
-  /*
- if (cityAlreadyExists) {
-   cityId = cityAlreadyExists.city_id;
- } else {
-   const newCityId = await sequelize.query(
-     `
-     INSERT INTO city (city_name) VALUES ($store_city);
-     `,
-     {
-       bind: {
-         store_city: store_city,
-       },
-       type: QueryTypes.INSERT,
-     }
-     );
-     cityId = newCityId.city_id;
-    }
-    */
-  if (exists.store_name)
-    throw new BadRequestError(
-      "Store already exists. Go ahead and make a review for it😵"
-    );
-
-  if (!exists.city_id && !exists.city_name) {
+  if (!exists) {
     const [newCityId] = await sequelize.query(
       `
       INSERT INTO city (city_name) VALUES ($store_city);
@@ -204,6 +166,8 @@ exports.createNewStore = async (req, res) => {
       }
     );
     cityId = newCityId;
+  } else if (exists.store_name && exists.city_name) {
+    throw new BadRequestError("😵ääfääären finns redan i den staden😵");
   } else {
     cityId = exists.city_id;
   }
