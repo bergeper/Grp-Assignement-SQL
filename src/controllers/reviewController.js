@@ -7,29 +7,6 @@ const {
   BadRequestError,
 } = require("../utils/errors");
 
-exports.getReviewById = async (req, res) => {
-  const reviewId = req.params.reviewId;
-
-  const [results] = await sequelize.query(
-    `
-    SELECT * FROM review s 
-    WHERE review_id = $reviewId
-    `,
-    {
-      bind: { reviewId: reviewId },
-      type: QueryTypes.SELECT,
-    }
-  );
-
-  if (!results || results.length == 0) {
-    throw new NotFoundError(
-      "We could not find the review you are looking for..."
-    );
-  }
-
-  return res.sendStatus(200).json(results);
-};
-
 exports.createNewReview = async (req, res) => {
   const { review_title, review_description, review_rating } = req.body;
   const storeId = req.params.storeId;
@@ -74,7 +51,7 @@ exports.deleteReviewById = async (req, res) => {
   );
 
   if (!review) {
-    throw new NotFoundError("This review does not exist.");
+    throw new NotFoundError("This review does not exist😢");
   }
 
   if (
@@ -95,7 +72,7 @@ exports.deleteReviewById = async (req, res) => {
     );
     return res.sendStatus(204);
   } else {
-    throw new UnauthorizedError("You are not allowed to delete this review.");
+    throw new UnauthorizedError("You are not allowed to delete this review😵");
   }
 };
 
@@ -106,7 +83,7 @@ exports.updateReviewById = async (req, res) => {
   const userRole = req.user.role;
 
   if (!review_description || !review_title || !review_rating) {
-    throw new BadRequestError("You must enter values for each field.");
+    throw new BadRequestError("You must enter values for each field⚠️");
   }
 
   const review = await sequelize.query(
