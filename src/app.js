@@ -2,11 +2,16 @@ require("dotenv").config();
 require("express-async-errors");
 const express = require("express");
 const apiRoutes = require("./routes");
+const helmet = require("helmet");
 const { errorMiddleware } = require("./middleware/errorMiddleware");
-const { notFoundMiddleware } = require("./middleware/notFoundMiddleware");
+const {
+  notFoundMiddleware,
+} = require("./middleware/notFoundMiddleware");
 const { sequelize } = require("./database/config");
 
 const app = express();
+
+app.use(helmet());
 
 app.use(express.json());
 
@@ -28,7 +33,9 @@ const run = async () => {
     app.listen(port, () => {
       console.log(
         `Server is listening on ${
-          process.env.NODE_ENV === "development" ? "http://localhost:" : "port "
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:"
+            : "port "
         }${port}`
       );
     });

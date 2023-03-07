@@ -18,6 +18,28 @@ exports.registerSchema = [
     ),
 ];
 
+exports.reviewSchema = [
+  body("review_title")
+    .not()
+    .isEmpty()
+    .isLength({ min: 3 })
+    .withMessage("You must provide a title"),
+  body("review_description")
+    .not()
+    .isEmpty()
+    .isLength({ min: 3, max: 200 })
+    .withMessage("You must provide a description"),
+  body("review_rating")
+    .isInt({ min: 1, max: 5 })
+    .withMessage("You must provide a number between 1 and 5."),
+];
+
+exports.storeSchema = [
+  body("store_name")
+    .not()
+    .isEmpty()
+    .withMessage("You must provide a store name"),
+];
 exports.loginSchema = [
   body("username").not().isEmpty().withMessage("You must provide a username"),
   body("password").not().isEmpty().withMessage("You must provide a password"),

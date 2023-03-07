@@ -2,15 +2,22 @@ const express = require("express");
 const router = express.Router();
 const { isAuthenticated } = require("../middleware/authenticationMiddleware");
 const {
-  getAllReviews,
   getReviewById,
-  createReview,
-  deleteReview,
+  createNewReview,
+  deleteReviewById,
+  updateReviewById,
 } = require("../controllers/reviewController");
+const { reviewSchema } = require("../middleware/validation/validationSchemas");
+const { validate } = require("../middleware/validation/validationMiddleware");
 
-router.get("/", getAllReviews);
 router.get("/:reviewId", getReviewById);
-router.post("/:storeId", isAuthenticated, createReview);
-router.delete("/:reviewId", isAuthenticated, deleteReview);
+router.post(
+  "/:storeId",
+  validate(reviewSchema),
+  isAuthenticated,
+  createNewReview
+);
+router.delete("/:reviewId", isAuthenticated, deleteReviewById);
+router.put("/:reviewId", isAuthenticated, updateReviewById);
 
 module.exports = router;

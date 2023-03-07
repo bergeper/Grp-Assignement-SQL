@@ -15,7 +15,7 @@ exports.stores = [
     store_adress: "Fjällfararvägen 10",
     store_zipcode: "837 96",
     store_fk_city_id: 1,
-    store_createdBy_fk_user_id: 3,
+    store_createdBy_fk_user_id: 1,
   },
   {
     store_name: "Stadium Åre",
@@ -42,7 +42,7 @@ exports.stores = [
     store_adress: "Birger Jarlsgatan 127",
     store_zipcode: "113 56",
     store_fk_city_id: 4,
-    store_createdBy_fk_user_id: 3,
+    store_createdBy_fk_user_id: 1,
   },
   {
     store_name: "Skidsport Bromma",
@@ -78,7 +78,7 @@ exports.stores = [
     store_adress: "Övre Husargatan 2",
     store_zipcode: "411 22",
     store_fk_city_id: 5,
-    store_createdBy_fk_user_id: 3,
+    store_createdBy_fk_user_id: 2,
   },
   {
     store_name: "Standtall",
