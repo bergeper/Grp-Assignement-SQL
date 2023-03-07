@@ -40,7 +40,7 @@ exports.getAllStores = async (req, res) => {
         bind: { city: formattedCity, limit: limit, offset: offset },
       }
     );
-    if (!store || store[0]) {
+    if (store.length < 0) {
       throw new NotFoundError(
         "sorry, we can't find any stores listed in that city😢"
       );
@@ -134,15 +134,14 @@ exports.createNewStore = async (req, res) => {
     store_city,
   } = req.body;
   const userId = req.user.userId;
+  let cityId;
 
   const [exists] = await sequelize.query(
     `
-    SELECT s.store_name, c.city_name, c.city_id
+    SELECT s.store_name, s.store_id, c.city_name, c.city_id
     FROM city c
-    LEFT JOIN store s ON s.store_name = $store_name
-    AND s.store_fk_city_id = c.city_id
-    WHERE c.city_name = $store_city
-    
+    LEFT JOIN store s ON s.store_fk_city_id = c.city_id
+    WHERE c.city_name = $store_city AND s.store_name = $store_name;
     `,
     {
       bind: {
@@ -185,13 +184,15 @@ exports.createNewStore = async (req, res) => {
      }
      );
      cityId = newCityId.city_id;
-   }
-   
-  */
-  let cityId;
-  console.log(exists);
-  if (!exists) {
-    const newCityId = await sequelize.query(
+    }
+    */
+  if (exists.store_name)
+    throw new BadRequestError(
+      "Store already exists. Go ahead and make a review for it😵"
+    );
+
+  if (!exists.city_id && !exists.city_name) {
+    const [newCityId] = await sequelize.query(
       `
       INSERT INTO city (city_name) VALUES ($store_city);
       `,
@@ -202,8 +203,11 @@ exports.createNewStore = async (req, res) => {
         type: QueryTypes.INSERT,
       }
     );
-    cityId = newCityId.city_id;
+    cityId = newCityId;
+  } else {
+    cityId = exists.city_id;
   }
+
   const [newStoreId] = await sequelize.query(
     `
     INSERT INTO store (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id)

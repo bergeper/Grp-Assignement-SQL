@@ -9,7 +9,7 @@ const { QueryTypes } = require("sequelize");
 
 exports.getAllUsers = async (req, res) => {
   const [users, metadata] = await sequelize.query(
-    "SELECT username, password, email FROM users"
+    "SELECT username, password, email, role FROM users"
   );
   return res.json(users);
 };
