@@ -1,8 +1,8 @@
-// kunna skapa user och hämta alla user, hämta user baserat på id, ta bort id (usern själv och admin)
 const { userRoles } = require("../constants/users");
 const {
   NotFoundError,
   UnauthorizedError,
+  BadRequestError,
 } = require("../utils/errors");
 const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
@@ -17,33 +17,91 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
   const userId = req.params.userId;
 
-  const [user, metadata] = await sequelize.query(
-    "SELECT user_id, email, name FROM users WHERE user_id = $userId",
+  const [user] = await sequelize.query(
+    `
+  SELECT * FROM user u
+  WHERE user_id = $userId
+  `,
     {
-      bind: { userId },
+      bind: { userId: userId },
       type: QueryTypes.SELECT,
     }
   );
 
-  if (!user) throw new NotFoundError("That user does not exist 😢");
+  const reviews = await sequelize.query(
+    `
+  SELECT r.review_id, r.review_title, r.review_description, r.review_rating, u.username
+  FROM review r
+  JOIN store s ON u.user_id = r.fk_user_id
+  JOIN user u ON s.store_id = r.fk_store_id
+  WHERE user_id = $userId
+  `,
+    {
+      bind: {
+        userId: userId,
+      },
+      type: QueryTypes.SELECT,
+    }
+  );
 
-  return res.json(user);
-};
+  if (!user || user.length == 0) {
+    throw new NotFoundError(
+      "We could not find the user you are looking for.😢"
+    );
+  }
 
-//CREATE
-exports.createNewUser = async (req, res) => {
-  const userId = req.params.userId;
-  return res.send("createNewUser");
+  const response = {
+    user: user,
+    reviews: reviews,
+  };
+  return res.json(response);
 };
 
 //UPDATE
 exports.updateUserById = async (req, res) => {
-  return res.send("updateUserById");
+  const { username, email, password } = req.body;
+
+  const userId = req.user.userId;
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedpassword = await bcrypt.hash(password, salt);
+
+  if (!password || !username) {
+    throw new BadRequestError(
+      "you must write username and password!"
+    );
+  }
+  const user = await sequelize.query(
+    `SELECT * FROM user
+    WHERE user_id = $userId`,
+    {
+      bind: { storeId: storeId },
+      type: QueryTypes.SELECT,
+    }
+  );
+
+  if (user.length <= 0)
+    throw new BadRequestError("This user doesn't exist");
+
+  const [updatedUser] = await sequelize.query(
+    `
+    UPDATE user SET email = $email, password = $password, username = $username 
+    WHERE user_id = $storeId;
+    RETURNING *;
+    `,
+    {
+      bind: {
+        email: email,
+        password: hashedpassword,
+        username: username,
+      },
+      type: QueryTypes.UPDATE,
+    }
+  );
+  return res.send(updatedUser);
 };
 
-//DELETE
 exports.deleteUserById = async (req, res) => {
-  const storeId = req.params.storeId;
   const userId = req.user.userId;
   const userRole = req.user.role;
 
