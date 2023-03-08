@@ -1,4 +1,4 @@
-const { QueryTypes, QueryError } = require("sequelize");
+const { QueryTypes } = require("sequelize");
 const { userRoles } = require("../constants/users");
 const { sequelize } = require("../database/config");
 const {
@@ -11,6 +11,8 @@ exports.createNewReview = async (req, res) => {
   const { review_title, review_description, review_rating } = req.body;
   const storeId = req.params.storeId;
   const userId = req.user.userId;
+
+  // if (!token) throw new UnauthorizedError("Token is not valid");
 
   const [newReviewId] = await sequelize.query(
     `
@@ -33,7 +35,8 @@ exports.createNewReview = async (req, res) => {
       "Location",
       `${req.protocol}://${req.headers.host}/api/v1/review/${newReviewId}`
     )
-    .sendStatus(201);
+    .status(201)
+    .json({ message: `You have created a review🚀` });
 };
 
 exports.deleteReviewById = async (req, res) => {
