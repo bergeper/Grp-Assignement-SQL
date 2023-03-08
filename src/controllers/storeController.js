@@ -167,7 +167,9 @@ exports.createNewStore = async (req, res) => {
     );
     cityId = newCityId;
   } else if (exists.store_name && exists.city_name) {
-    throw new BadRequestError("😵ääfääären finns redan i den staden😵");
+    throw new BadRequestError(
+      "Store already exists in this city! Go make a review for it!😊"
+    );
   } else {
     cityId = exists.city_id;
   }
