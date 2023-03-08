@@ -30,7 +30,7 @@ Express
 
 ## Database Design
 
-![database](./dbDesign/MicrosoftTeams-image%20(3).png)
+![database](./dbDesign/Sk%C3%A4rmavbild%202023-03-08%20kl.%2021.35.05.png)
 
 ## USERS
 
