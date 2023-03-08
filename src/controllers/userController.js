@@ -6,6 +6,7 @@ const {
 } = require("../utils/errors");
 const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
+const bcrypt = require("bcrypt");
 
 exports.getAllUsers = async (req, res) => {
   const [users, metadata] = await sequelize.query(
@@ -62,20 +63,35 @@ exports.updateUserById = async (req, res) => {
   const { username, email, password } = req.body;
 
   const userId = req.user.userId;
+  const userRole = req.user.role;
 
   const salt = await bcrypt.genSalt(10);
   const hashedpassword = await bcrypt.hash(password, salt);
 
-  if (!password || !username) {
+  if (
+    userId != req.user?.userId &&
+    req.user.role !== userRole.ADMIN
+  ) {
+    throw new UnauthorizedError("Unauthorized Access");
+  }
+
+  if (username == "" || email == "" || password == "") {
     throw new BadRequestError(
-      "you must write username and password!"
+      "Input fields cannot be empty! Try again."
     );
   }
+
+  if (!email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
+    throw new BadRequestError(
+      "User email must be an email! Try again."
+    );
+  }
+
   const user = await sequelize.query(
     `SELECT * FROM user
     WHERE user_id = $userId`,
     {
-      bind: { storeId: storeId },
+      bind: { userId: userId },
       type: QueryTypes.SELECT,
     }
   );
@@ -83,22 +99,24 @@ exports.updateUserById = async (req, res) => {
   if (user.length <= 0)
     throw new BadRequestError("This user doesn't exist");
 
-  const [updatedUser] = await sequelize.query(
+  const [updatedUser, updatedUserMetaData] = await sequelize.query(
     `
     UPDATE user SET email = $email, password = $password, username = $username 
-    WHERE user_id = $storeId;
-    RETURNING *;
+    WHERE user_id = $userId;
     `,
     {
       bind: {
         email: email,
         password: hashedpassword,
         username: username,
+        userId: userId,
       },
       type: QueryTypes.UPDATE,
     }
   );
-  return res.send(updatedUser);
+  return res.status(201).json({
+    message: "Success! User is now updated.",
+  });
 };
 
 exports.deleteUserById = async (req, res) => {
