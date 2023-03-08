@@ -12,8 +12,6 @@ exports.createNewReview = async (req, res) => {
   const storeId = req.params.storeId;
   const userId = req.user.userId;
 
-  // if (!token) throw new UnauthorizedError("Token is not valid");
-
   const [newReviewId] = await sequelize.query(
     `
       INSERT INTO review (review_title, review_description, review_rating, fk_user_id, fk_store_id)
@@ -73,9 +71,9 @@ exports.deleteReviewById = async (req, res) => {
         types: QueryTypes.DELETE,
       }
     );
-    return res.sendStatus(204);
+    return res.status(204);
   } else {
-    throw new UnauthorizedError("You are not allowed to delete this review😵");
+    throw new UnauthorizedError("You are not allowed to delete this review⚠️");
   }
 };
 
