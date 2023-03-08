@@ -17,9 +17,9 @@ const snowsportsDb = async () => {
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS user (
       user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL,
+      username TEXT NOT NULL UNIQUE,
       password TEXT NOT NULL,
-      email TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
       role TEXT NOT NULL DEFAULT "USER"
     );
     `);

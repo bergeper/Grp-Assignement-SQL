@@ -1,4 +1,4 @@
-const { QueryTypes, QueryError } = require("sequelize");
+const { QueryTypes } = require("sequelize");
 const { userRoles } = require("../constants/users");
 const { sequelize } = require("../database/config");
 const {
@@ -33,7 +33,8 @@ exports.createNewReview = async (req, res) => {
       "Location",
       `${req.protocol}://${req.headers.host}/api/v1/review/${newReviewId}`
     )
-    .sendStatus(201);
+    .status(201)
+    .json({ message: `You have created a review🚀` });
 };
 
 exports.deleteReviewById = async (req, res) => {
@@ -70,9 +71,9 @@ exports.deleteReviewById = async (req, res) => {
         types: QueryTypes.DELETE,
       }
     );
-    return res.sendStatus(204);
+    return res.status(204);
   } else {
-    throw new UnauthorizedError("You are not allowed to delete this review😵");
+    throw new UnauthorizedError("You are not allowed to delete this review⚠️");
   }
 };
 

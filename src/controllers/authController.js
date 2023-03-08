@@ -23,7 +23,7 @@ exports.register = async (req, res) => {
   );
 
   return res.status(201).json({
-    message: "Registration succeeded. Please log in.",
+    message: `Registration succeeded. You can login in now ${username}`,
   });
 };
 
@@ -44,8 +44,7 @@ exports.login = async (req, res) => {
     canditatePassword, // Det user skriver in
     user.password // det som finns i databasen
   );
-  if (!isPasswordCorrect)
-    throw new UnauthenticatedError("Invalid Credentials");
+  if (!isPasswordCorrect) throw new UnauthenticatedError("Invalid Credentials");
 
   const jwtPayload = {
     userId: user.user_id,
