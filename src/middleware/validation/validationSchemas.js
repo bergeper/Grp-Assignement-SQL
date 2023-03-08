@@ -39,6 +39,13 @@ exports.storeSchema = [
     .not()
     .isEmpty()
     .withMessage("You must provide a store name"),
+    body("store_adress")
+    .not()
+    .isEmpty()
+    .withMessage("You must provide a store adress"),
+    body("store_zipcode")
+    .isInt({min: 5, max: 5})
+    .withMessage("You must provide a zipcode"),
 ];
 exports.loginSchema = [
   body("username").not().isEmpty().withMessage("You must provide a username"),

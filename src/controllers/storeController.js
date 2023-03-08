@@ -117,11 +117,9 @@ exports.deleteStore = async (req, res) => {
     await sequelize.query(`DELETE FROM store WHERE store_Id = $storeId`, {
       bind: { storeId: storeId },
     });
-    return res.send("hej");
+    return res.status(204);
   } else {
-    return res
-      .status(403)
-      .json("You are not authorized to delete this store😵");
+      throw new UnauthorizedError("You are not authorized to delete this store ⚠️");
   }
 };
 
@@ -197,7 +195,8 @@ exports.createNewStore = async (req, res) => {
       "Location",
       `${req.protocol}://${req.headers.host}/api/v1/stores/${newStoreId}`
     )
-    .sendStatus(201);
+    .sendStatus(201)
+    .json({ message: `You have created a store🚀` });
 };
 
 exports.updateStoreById = async (req, res) => {
