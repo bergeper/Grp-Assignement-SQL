@@ -9,14 +9,29 @@ const { QueryTypes } = require("sequelize");
 const bcrypt = require("bcrypt");
 
 exports.getAllUsers = async (req, res) => {
-  const [users, metadata] = await sequelize.query(
+  const [users, usersMetaData] = await sequelize.query(
     "SELECT username, password, email, role FROM users"
   );
+
+  if (!users)
+    throw new NotFoundError("There are no registered users!");
+
   return res.json(users);
 };
 
 exports.getUserById = async (req, res) => {
   const userId = req.params.userId;
+
+  if (isNaN(userId)) {
+    throw new BadRequestError("User ID must be a number.");
+  }
+
+  if (
+    userId != req.user?.userId &&
+    req.user.role !== userRoles.ADMIN
+  ) {
+    throw new UnauthorizedError("Unauthorized Access");
+  }
 
   const [user] = await sequelize.query(
     `
@@ -58,7 +73,6 @@ exports.getUserById = async (req, res) => {
   return res.json(response);
 };
 
-//UPDATE
 exports.updateUserById = async (req, res) => {
   const { username, email, password } = req.body;
 
