@@ -17,6 +17,11 @@ router.post(
   createNewReview
 );
 router.delete("/:reviewId", isAuthenticated, deleteReviewById);
-router.put("/:reviewId", isAuthenticated, updateReviewById);
+router.put(
+  "/:reviewId",
+  validate(reviewSchema),
+  isAuthenticated,
+  updateReviewById
+);
 
 module.exports = router;
