@@ -11,6 +11,9 @@ const {
   isAuthenticated,
   authorizeRoles,
 } = require("../middleware/authenticationMiddleware");
+const {
+  validate,
+} = require("../middleware/validation/validationMiddleware");
 
 router.get(
   "/",
