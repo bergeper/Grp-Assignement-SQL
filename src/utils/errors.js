@@ -49,14 +49,6 @@ class ValidationError extends BadRequestError {
   }
 }
 
-class ServerFailure extends CustomAPIError {
-  constructor(message) {
-    super(message);
-    this.statusCode = 500;
-    this.name = "ServerFailure";
-  }
-}
-
 module.exports = {
   catchErrors,
   NotFoundError,
