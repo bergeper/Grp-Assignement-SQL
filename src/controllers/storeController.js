@@ -21,13 +21,13 @@ exports.getAllStores = async (req, res) => {
         bind: { limit: limit, offset: offset },
       }
     );
-    console.log(store);
     if (store.length < 0) {
       throw new NotFoundError("sorry, we can't find any stores😢");
     }
     return res.json(store);
   } else {
-    const formattedCity = city.trim();
+    const formattedCity =
+      city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
 
     const [results] = await sequelize.query(
       `SELECT *

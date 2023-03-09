@@ -110,7 +110,7 @@ exports.updateUserById = async (req, res) => {
 };
 
 exports.deleteUserById = async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.params.userId;
   const userRole = req.user.role;
 
   if (userRole == userRoles.ADMIN || userId == req.user.userId) {
