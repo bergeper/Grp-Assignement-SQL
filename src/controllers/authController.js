@@ -28,11 +28,16 @@ exports.register = async (req, res) => {
       }
     );
   } else {
-    const userExists = await sequelize.query(`
+    const [userExists] = await sequelize.query(
+      `
     SELECT username, email FROM user
-    `);
-
-    if (userExists.username == username || userExists.email == email) {
+    WHERE username = $username OR email = $email
+    `,
+      {
+        bind: { username: username, email: email },
+      }
+    );
+    if (userExists.length <= 0) {
       await sequelize.query(
         "INSERT INTO user (username, email, password) VALUES ($username, $email, $password)",
         {
