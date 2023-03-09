@@ -8,7 +8,29 @@ exports.registerSchema = [
     .withMessage(
       "You must provide a username that is at least 3 characters long"
     ),
-  body("email").isEmail().withMessage("You must provide a valid email address"),
+  body("email")
+    .isEmail()
+    .withMessage("You must provide a valid email address"),
+  body("password")
+    .not()
+    .isEmpty()
+    .isLength({ min: 6 })
+    .withMessage(
+      "You must provide a password that is at least 6 characters long"
+    ),
+];
+
+exports.updateUserSchema = [
+  body("username")
+    .not()
+    .isEmpty()
+    .isLength({ min: 3 })
+    .withMessage(
+      "You must provide a username that is at least 3 characters long"
+    ),
+  body("email")
+    .isEmail()
+    .withMessage("You must provide a valid email address"),
   body("password")
     .not()
     .isEmpty()
@@ -39,15 +61,21 @@ exports.storeSchema = [
     .not()
     .isEmpty()
     .withMessage("You must provide a store name"),
-    body("store_adress")
+  body("store_adress")
     .not()
     .isEmpty()
     .withMessage("You must provide a store adress"),
-    body("store_zipcode")
-    .isInt({min: 5, max: 5})
+  body("store_zipcode")
+    .isInt({ min: 5, max: 5 })
     .withMessage("You must provide a zipcode"),
 ];
 exports.loginSchema = [
-  body("username").not().isEmpty().withMessage("You must provide a username"),
-  body("password").not().isEmpty().withMessage("You must provide a password"),
+  body("username")
+    .not()
+    .isEmpty()
+    .withMessage("You must provide a username"),
+  body("password")
+    .not()
+    .isEmpty()
+    .withMessage("You must provide a password"),
 ];

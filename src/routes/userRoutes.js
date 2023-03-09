@@ -20,6 +20,11 @@ router.get(
 );
 router.get("/:userId", isAuthenticated, getUserById);
 router.delete("/:userId", isAuthenticated, deleteUserById);
-router.put("/:userId", isAuthenticated, updateUserById);
+router.put(
+  "/:userId",
+  validate(updateUserSchema),
+  isAuthenticated,
+  updateUserById
+);
 
 module.exports = router;
