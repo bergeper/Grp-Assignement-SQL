@@ -8,6 +8,7 @@ const {
   getStoreById,
   createNewStore,
   deleteStore,
+  storeSchema,
   updateStoreById,
 } = require("../controllers/storeController");
 
