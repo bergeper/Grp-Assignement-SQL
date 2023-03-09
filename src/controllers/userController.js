@@ -6,6 +6,9 @@ const {
 } = require("../utils/errors");
 const { sequelize } = require("../database/config");
 const { QueryTypes } = require("sequelize");
+const {
+  validate,
+} = require("../middleware/validation/validationMiddleware");
 const bcrypt = require("bcrypt");
 
 exports.getAllUsers = async (req, res) => {
