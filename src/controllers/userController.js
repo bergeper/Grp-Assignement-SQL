@@ -87,8 +87,6 @@ exports.updateUserById = async (req, res) => {
     }
   );
 
-  if (user.length <= 0) throw new BadRequestError("This user doesn't exist");
-
   const [updatedUser, updatedUserMetaData] = await sequelize.query(
     `
     UPDATE user SET email = $email, password = $password, username = $username 
@@ -129,6 +127,8 @@ exports.deleteUserById = async (req, res) => {
         type: QueryTypes.UPDATE,
       }
     );
+
+    if (userId.length <= 0 ) throw new BadRequestError("User does not exists");
 
     await sequelize.query(`DELETE FROM user WHERE user_id = $userId;`, {
       bind: { userId: userId },
