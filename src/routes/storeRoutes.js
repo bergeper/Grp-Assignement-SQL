@@ -15,7 +15,7 @@ const {
 router.get("/", getAllStores);
 router.get("/:storeId", getStoreById);
 router.post("/", validate(storeSchema), isAuthenticated, createNewStore);
-router.put("/:storeId", isAuthenticated, updateStoreById);
+router.put("/:storeId", validate(storeSchema), isAuthenticated, updateStoreById);
 router.delete("/:storeId", isAuthenticated, deleteStore);
 
 module.exports = router;
