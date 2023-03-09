@@ -66,7 +66,7 @@ exports.storeSchema = [
     .isEmpty()
     .withMessage("You must provide a store adress"),
   body("store_zipcode")
-    .isInt({ min: 5, max: 5 })
+    .isLength({ min: 6, max: 6 })
     .withMessage("You must provide a zipcode"),
 ];
 exports.loginSchema = [
