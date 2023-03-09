@@ -66,9 +66,9 @@ exports.getStoreById = async (req, res) => {
     }
   );
 
-  if (!store) {
+  if (!store.store_id) {
     throw new NotFoundError(
-      "We could not find the store you are looking for.😢"
+      "We could'nt find the store you are looking for.😢"
     );
   }
   const reviews = await sequelize.query(
@@ -235,7 +235,7 @@ exports.updateStoreById = async (req, res) => {
   );
 
   if (store.length <= 0) throw new UnauthorizedError("Store does not exist.");
-  console.log(store);
+
   if (
     userRole == userRoles.ADMIN ||
     userId == store[0].store_createdBy_fk_user_id

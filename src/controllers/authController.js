@@ -72,8 +72,8 @@ exports.login = async (req, res) => {
   if (!user) throw new UnauthenticatedError("Invalid Credentials");
 
   const isPasswordCorrect = await bcrypt.compare(
-    canditatePassword, // Det user skriver in
-    user.password // det som finns i databasen
+    canditatePassword,
+    user.password
   );
   if (!isPasswordCorrect) throw new UnauthenticatedError("Invalid Credentials");
 
