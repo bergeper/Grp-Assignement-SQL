@@ -235,7 +235,7 @@ exports.updateStoreById = async (req, res) => {
   );
 
   if (store.length <= 0) throw new UnauthorizedError("Store does not exist.");
-  console.log(store);
+
   if (
     userRole == userRoles.ADMIN ||
     userId == store[0].store_createdBy_fk_user_id
