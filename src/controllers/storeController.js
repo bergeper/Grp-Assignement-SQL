@@ -241,8 +241,11 @@ exports.updateStoreById = async (req, res) => {
 
   if (store.length <= 0)
     throw new UnauthorizedError("Store does not exist.");
-
-  if (userRole == userRoles.ADMIN || userId == review[0].fk_user_id) {
+  console.log(store);
+  if (
+    userRole == userRoles.ADMIN ||
+    userId == store[0].store_createdBy_fk_user_id
+  ) {
     const [updatedStore] = await sequelize.query(
       `
     UPDATE store SET store_name = $store_name, store_description = $store_description, 
