@@ -10,11 +10,10 @@ const bcrypt = require("bcrypt");
 
 exports.getAllUsers = async (req, res) => {
   const [users, usersMetaData] = await sequelize.query(
-    "SELECT username, password, email, role FROM users"
+    "SELECT username, password, email, role FROM user"
   );
 
-  if (!users)
-    throw new NotFoundError("There are no registered users!");
+  if (!users) throw new NotFoundError("There are no registered users!");
 
   return res.json(users);
 };
@@ -75,10 +74,7 @@ exports.updateUserById = async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedpassword = await bcrypt.hash(password, salt);
 
-  if (
-    userId != req.user?.userId &&
-    req.user.role !== userRole.ADMIN
-  ) {
+  if (userId != req.user?.userId && req.user.role !== userRole.ADMIN) {
     throw new UnauthorizedError("Unauthorized Access");
   }
 
@@ -91,8 +87,7 @@ exports.updateUserById = async (req, res) => {
     }
   );
 
-  if (user.length <= 0)
-    throw new BadRequestError("This user doesn't exist");
+  if (user.length <= 0) throw new BadRequestError("This user doesn't exist");
 
   const [updatedUser, updatedUserMetaData] = await sequelize.query(
     `
@@ -119,13 +114,10 @@ exports.deleteUserById = async (req, res) => {
   const userRole = req.user.role;
 
   if (userRole == userRoles.ADMIN || userId == req.user.userId) {
-    await sequelize.query(
-      `DELETE FROM review WHERE fk_user_id = $userId;`,
-      {
-        bind: { userId: userId },
-        type: QueryTypes.DELETE,
-      }
-    );
+    await sequelize.query(`DELETE FROM review WHERE fk_user_id = $userId;`, {
+      bind: { userId: userId },
+      type: QueryTypes.DELETE,
+    });
 
     await sequelize.query(
       `
@@ -138,13 +130,10 @@ exports.deleteUserById = async (req, res) => {
       }
     );
 
-    await sequelize.query(
-      `DELETE FROM user WHERE user_id = $userId;`,
-      {
-        bind: { userId: userId },
-        type: QueryTypes.DELETE,
-      }
-    );
+    await sequelize.query(`DELETE FROM user WHERE user_id = $userId;`, {
+      bind: { userId: userId },
+      type: QueryTypes.DELETE,
+    });
   } else {
     throw new UnauthorizedError(
       "You don't have permission to delete this user 😢"
