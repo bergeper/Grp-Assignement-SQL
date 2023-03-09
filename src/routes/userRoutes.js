@@ -11,19 +11,12 @@ const {
   isAuthenticated,
   authorizeRoles,
 } = require("../middleware/authenticationMiddleware");
-const {
-  validate,
-} = require("../middleware/validation/validationMiddleware");
+const { validate } = require("../middleware/validation/validationMiddleware");
 const {
   updateUserSchema,
-} = require("../middleware/validation/updateUserSchemas");
+} = require("../middleware/validation/validationSchemas");
 
-router.get(
-  "/",
-  isAuthenticated,
-  authorizeRoles(userRoles.ADMIN),
-  getAllUsers
-);
+router.get("/", isAuthenticated, authorizeRoles(userRoles.ADMIN), getAllUsers);
 router.get("/:userId", isAuthenticated, getUserById);
 router.delete("/:userId", isAuthenticated, deleteUserById);
 router.put(

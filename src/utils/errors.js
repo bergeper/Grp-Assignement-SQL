@@ -56,5 +56,4 @@ module.exports = {
   UnauthenticatedError,
   UnauthorizedError,
   ValidationError,
-  ServerFailure,
 };
