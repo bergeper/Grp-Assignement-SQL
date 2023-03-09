@@ -15,7 +15,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3000/api/v1/stores/",
+							"raw": "http://localhost:3000/api/v1/stores/?city=åRe&limit=10",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -30,13 +30,11 @@
 							"query": [
 								{
 									"key": "city",
-									"value": "åRe",
-									"disabled": true
+									"value": "åRe"
 								},
 								{
 									"key": "limit",
-									"value": "10",
-									"disabled": true
+									"value": "10"
 								}
 							]
 						}
@@ -87,7 +85,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3000/api/v1/stores/12",
+							"raw": "http://localhost:3000/api/v1/stores/:storeId",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -97,7 +95,13 @@
 								"api",
 								"v1",
 								"stores",
-								"12"
+								":storeId"
+							],
+							"variable": [
+								{
+									"key": "storeId",
+									"value": "2"
+								}
 							]
 						}
 					},
@@ -348,7 +352,7 @@
 							"variable": [
 								{
 									"key": "reviewId",
-									"value": "18"
+									"value": "10"
 								}
 							]
 						}
@@ -522,7 +526,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"ADMIN\",\r\n    \"email\": \"adminman@gmail.com\",\r\n    \"password\": \"hej123\"\r\n}",
+							"raw": "{\r\n    \"username\": \"Skibum\",\r\n    \"email\": \"ski@gmail.com\",\r\n    \"password\": \"hej123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
