@@ -68,7 +68,7 @@ exports.getStoreById = async (req, res) => {
 
   if (!store.store_id) {
     throw new NotFoundError(
-      "We could not find the store you are looking for.😢"
+      "We could'nt find the store you are looking for.😢"
     );
   }
   const reviews = await sequelize.query(
