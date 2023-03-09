@@ -13,7 +13,7 @@ const {
 
 router.get("/", getAllStores);
 router.get("/:storeId", getStoreById);
-router.post("/", isAuthenticated, createNewStore);
+router.post("/", validate(storeSchema), isAuthenticated, createNewStore);
 router.put("/:storeId", isAuthenticated, updateStoreById);
 router.delete("/:storeId", isAuthenticated, deleteStore);
 
