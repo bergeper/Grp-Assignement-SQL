@@ -1,4 +1,4 @@
-const { UnauthenticatedError } = require("../utils/errors");
+const { UnauthenticatedError, BadRequestError } = require("../utils/errors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { sequelize } = require("../database/config");
@@ -11,16 +11,42 @@ exports.register = async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedpassword = await bcrypt.hash(password, salt);
 
-  await sequelize.query(
-    "INSERT INTO user (username, email, password) VALUES ($username, $email, $password)",
-    {
-      bind: {
-        username: username,
-        password: hashedpassword,
-        email: email,
-      },
-    }
+  const [results, metadata] = await sequelize.query(
+    "SELECT user_id FROM user LIMIT 1"
   );
+
+  if (!results || results.length < 1) {
+    await sequelize.query(
+      "INSERT INTO user (username, email, password, role) VALUES ($username, $email, $password, $role)",
+      {
+        bind: {
+          username: username,
+          password: hashedpassword,
+          email: email,
+          role: userRoles.ADMIN,
+        },
+      }
+    );
+  } else {
+    const userExists = await sequelize.query(`
+    SELECT username, email FROM user
+    `);
+
+    if (userExists.username == username || userExists.email == email) {
+      await sequelize.query(
+        "INSERT INTO user (username, email, password) VALUES ($username, $email, $password)",
+        {
+          bind: {
+            username: username,
+            password: hashedpassword,
+            email: email,
+          },
+        }
+      );
+    } else {
+      throw new BadRequestError("That username or email does already exist.");
+    }
+  }
 
   return res.status(201).json({
     message: `Registration succeeded. You can login in now ${username}`,

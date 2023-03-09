@@ -55,15 +55,22 @@ exports.getStoreById = async (req, res) => {
 
   const [store] = await sequelize.query(
     `
-  SELECT store_id, store_name FROM store s 
-  WHERE store_id = $storeId
-  `,
+    SELECT store_id, store_name, AVG(IFNULL(review_rating, 0)) AS rating
+    FROM store s
+    LEFT JOIN review r ON s.store_id = r.fk_store_id
+    WHERE store_id = $storeId
+    `,
     {
       bind: { storeId: storeId },
       type: QueryTypes.SELECT,
     }
   );
 
+  if (!store) {
+    throw new NotFoundError(
+      "We could not find the store you are looking for.😢"
+    );
+  }
   const reviews = await sequelize.query(
     `
   SELECT r.review_id, r.review_title, r.review_description, r.review_rating, u.username
@@ -79,12 +86,6 @@ exports.getStoreById = async (req, res) => {
       type: QueryTypes.SELECT,
     }
   );
-
-  if (!store || store.length == 0) {
-    throw new NotFoundError(
-      "We could not find the store you are looking for.😢"
-    );
-  }
 
   const response = {
     store: store,
@@ -105,6 +106,9 @@ exports.deleteStore = async (req, res) => {
       bind: { storeId: storeId },
     }
   );
+
+  if (store.length <= 0)
+    throw new BadRequestError("Store does not exists");
 
   const userId = store[0].store_createdBy_fk_user_id;
 

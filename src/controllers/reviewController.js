@@ -31,7 +31,7 @@ exports.createNewReview = async (req, res) => {
   return res
     .setHeader(
       "Location",
-      `${req.protocol}://${req.headers.host}/api/v1/review/${newReviewId}`
+      `${req.protocol}://${req.headers.host}/api/v1/users/${userId}`
     )
     .status(201)
     .json({ message: `You have created a review🚀` });
