@@ -8,9 +8,12 @@ const {
   getStoreById,
   createNewStore,
   deleteStore,
-  storeSchema,
   updateStoreById,
 } = require("../controllers/storeController");
+
+const {storeSchema} = require("../middleware/validation/validationSchemas")
+
+const { validate } = require("../middleware/validation/validationMiddleware");
 
 router.get("/", getAllStores);
 router.get("/:storeId", getStoreById);
