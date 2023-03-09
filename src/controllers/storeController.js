@@ -109,20 +109,25 @@ exports.deleteStore = async (req, res) => {
   const userId = store[0].store_createdBy_fk_user_id;
 
   if (req.user.role == userRoles.ADMIN || req.user.userId == userId) {
-    await sequelize.query(`DELETE FROM reviews WHERE fk_store_id = $storeId`, {
-      bind: { storeId: storeId },
-    });
-
-    console.log("true");
-    await sequelize.query(`DELETE FROM store WHERE store_Id = $storeId`, {
-      bind: { storeId: storeId },
-    });
-    return res.status(204);
+    await sequelize.query(
+      `DELETE FROM review WHERE fk_store_id = $storeId`,
+      {
+        bind: { storeId: storeId },
+      }
+    );
+    await sequelize.query(
+      `DELETE FROM store WHERE store_Id = $storeId`,
+      {
+        bind: { storeId: storeId },
+      }
+    );
+    return res.sendStatus(204);
   } else {
-      throw new UnauthorizedError("You are not authorized to delete this store ⚠️");
+    throw new UnauthorizedError(
+      "You are not authorized to delete this store ⚠️"
+    );
   }
 };
-
 exports.createNewStore = async (req, res) => {
   const {
     store_name,
@@ -218,7 +223,9 @@ exports.updateStoreById = async (req, res) => {
     !store_zipcode ||
     !store_fk_city_id
   ) {
-    throw new BadRequestError("You must enter values for each field.");
+    throw new BadRequestError(
+      "You must enter values for each field."
+    );
   }
 
   const store = await sequelize.query(
@@ -232,7 +239,8 @@ exports.updateStoreById = async (req, res) => {
     }
   );
 
-  if (store.length <= 0) throw new UnauthorizedError("Store does not exist.");
+  if (store.length <= 0)
+    throw new UnauthorizedError("Store does not exist.");
 
   if (userRole == userRoles.ADMIN || userId == review[0].fk_user_id) {
     const [updatedStore] = await sequelize.query(
