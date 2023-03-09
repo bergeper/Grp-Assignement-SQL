@@ -66,7 +66,7 @@ exports.getStoreById = async (req, res) => {
     }
   );
 
-  if (!store) {
+  if (!store.store_id) {
     throw new NotFoundError(
       "We could not find the store you are looking for.😢"
     );
