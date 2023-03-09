@@ -53,14 +53,11 @@ exports.getAllStores = async (req, res) => {
 exports.getStoreById = async (req, res) => {
   const storeId = req.params.storeId;
 
-  if (storeId.length == 0) {
-    throw new BadRequestError("You must provide a store Id😢");
-  }
   const [store] = await sequelize.query(
     `
-    SELECT store_id, store_name, AVG(review_rating) AS rating
+    SELECT store_id, store_name, AVG(IFNULL(review_rating, 0)) AS rating
     FROM store s
-    JOIN review r ON s.store_id = r.fk_store_id
+    LEFT JOIN review r ON s.store_id = r.fk_store_id
     WHERE store_id = $storeId
     `,
     {
