@@ -14,6 +14,9 @@ const {
 const {
   validate,
 } = require("../middleware/validation/validationMiddleware");
+const {
+  updateUserSchema,
+} = require("../middleware/validation/updateUserSchemas");
 
 router.get(
   "/",
