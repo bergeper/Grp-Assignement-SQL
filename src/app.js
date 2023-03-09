@@ -4,9 +4,7 @@ const express = require("express");
 const apiRoutes = require("./routes");
 const helmet = require("helmet");
 const { errorMiddleware } = require("./middleware/errorMiddleware");
-const {
-  notFoundMiddleware,
-} = require("./middleware/notFoundMiddleware");
+const { notFoundMiddleware } = require("./middleware/notFoundMiddleware");
 const { sequelize } = require("./database/config");
 const cors = require("cors");
 const xss = require("xss-clean");
@@ -40,13 +38,7 @@ const run = async () => {
     await sequelize.authenticate();
 
     app.listen(port, () => {
-      console.log(
-        `Server is listening on ${
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:"
-            : "port "
-        }${port}`
-      );
+      console.log(`🚀Server is running on http://localhost:3000/${port}`);
     });
   } catch (error) {
     console.error(error);
