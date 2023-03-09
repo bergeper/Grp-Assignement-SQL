@@ -82,9 +82,33 @@ exports.reviews = [
   {
     review_title: "Expensive",
     review_description:
-      "Pig rooster sheep. Brussel sprouts cow, rabbits a gates a, storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
+      "Storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
     review_rating: 2,
     fk_user_id: 4,
     fk_store_id: 10,
+  },
+  {
+    review_title: "Nice staff",
+    review_description:
+      "Pig rooster sheep. Brussel sprouts cow, rabbits a gates a, storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
+    review_rating: 3,
+    fk_user_id: 4,
+    fk_store_id: 2,
+  },
+  {
+    review_title: "Terrible skiis",
+    review_description:
+      "Storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
+    review_rating: 2,
+    fk_user_id: 4,
+    fk_store_id: 3,
+  },
+  {
+    review_title: "Horribly service",
+    review_description:
+      "Storage shed fences. Brussel sprouts cow, rabbits a gates a, storage shed fences. Goose hammers cattle rats in crows. Peacocks baa ostriches owls. Mouse soybeans sweet corn hogs llamas or oink oink wind. Oranges cucumbers rhubarb gourds watermelon. Cat at pineapples pigeons. Cauliflower a seeds quail. Quac.",
+    review_rating: 2,
+    fk_user_id: 4,
+    fk_store_id: 8,
   },
 ];

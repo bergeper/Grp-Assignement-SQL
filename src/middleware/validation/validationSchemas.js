@@ -8,9 +8,7 @@ exports.registerSchema = [
     .withMessage(
       "You must provide a username that is at least 3 characters long"
     ),
-  body("email")
-    .isEmail()
-    .withMessage("You must provide a valid email address"),
+  body("email").isEmail().withMessage("You must provide a valid email address"),
   body("password")
     .not()
     .isEmpty()
@@ -28,9 +26,7 @@ exports.updateUserSchema = [
     .withMessage(
       "You must provide a username that is at least 3 characters long"
     ),
-  body("email")
-    .isEmail()
-    .withMessage("You must provide a valid email address"),
+  body("email").isEmail().withMessage("You must provide a valid email address"),
   body("password")
     .not()
     .isEmpty()
@@ -49,7 +45,7 @@ exports.reviewSchema = [
   body("review_description")
     .not()
     .isEmpty()
-    .isLength({ min: 3, max: 200 })
+    .isLength({ min: 3, max: 500 })
     .withMessage("You must provide a description"),
   body("review_rating")
     .isInt({ min: 1, max: 5 })
@@ -70,12 +66,6 @@ exports.storeSchema = [
     .withMessage("You must provide a zipcode"),
 ];
 exports.loginSchema = [
-  body("username")
-    .not()
-    .isEmpty()
-    .withMessage("You must provide a username"),
-  body("password")
-    .not()
-    .isEmpty()
-    .withMessage("You must provide a password"),
+  body("username").not().isEmpty().withMessage("You must provide a username"),
+  body("password").not().isEmpty().withMessage("You must provide a password"),
 ];

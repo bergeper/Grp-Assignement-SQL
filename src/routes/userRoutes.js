@@ -19,11 +19,6 @@ const {
 router.get("/", isAuthenticated, authorizeRoles(userRoles.ADMIN), getAllUsers);
 router.get("/:userId", getUserById);
 router.delete("/:userId", isAuthenticated, deleteUserById);
-router.put(
-  "/:userId",
-  validate(updateUserSchema),
-  isAuthenticated,
-  updateUserById
-);
+router.put("/", validate(updateUserSchema), isAuthenticated, updateUserById);
 
 module.exports = router;

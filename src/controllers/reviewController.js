@@ -50,11 +50,11 @@ exports.deleteReviewById = async (req, res) => {
       type: QueryTypes.SELECT,
     }
   );
+  console.log(review);
 
   if (!review) {
     throw new NotFoundError("This review does not exist😢");
   }
-
   if (
     req.user.role == userRoles.ADMIN ||
     req.user.userId == review.fk_user_id
@@ -71,7 +71,7 @@ exports.deleteReviewById = async (req, res) => {
         types: QueryTypes.DELETE,
       }
     );
-    return res.status(204);
+    return res.sendStatus(204);
   } else {
     throw new UnauthorizedError("You are not allowed to delete this review⚠️");
   }

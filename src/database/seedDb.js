@@ -7,13 +7,11 @@ const { reviews } = require("../data/reviews");
 
 const snowsportsDb = async () => {
   try {
-    // Drop tables if exist
     await sequelize.query(`DROP TABLE IF EXISTS review;`);
     await sequelize.query(`DROP TABLE IF EXISTS store;`);
     await sequelize.query(`DROP TABLE IF EXISTS user;`);
     await sequelize.query(`DROP TABLE IF EXISTS city;`);
 
-    // Create users table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS user (
       user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,14 +22,12 @@ const snowsportsDb = async () => {
     );
     `);
 
-    // Create city table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS city (
       city_id INTEGER PRIMARY KEY AUTOINCREMENT,
       city_name TEXT NOT NULL
     );`);
 
-    // Create stores table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS store (
       store_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,7 +42,6 @@ const snowsportsDb = async () => {
       );
       `);
 
-    // Create reviews table
     await sequelize.query(`
     CREATE TABLE IF NOT EXISTS review (
       review_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,7 +55,6 @@ const snowsportsDb = async () => {
       );
       `);
 
-    // Create USER
     let userInsertQuery = `INSERT INTO user (username, email, password, role) VALUES `;
 
     let userInsertQueryVariables = [];
@@ -83,8 +77,6 @@ const snowsportsDb = async () => {
 
     await sequelize.query(userInsertQuery);
 
-    //const [usersRes, metadata] = await sequelize.query("SELECT * FROM users");
-
     let cityInsertQuery = "INSERT INTO city (city_name) VALUES ";
 
     let cityInsertQueryVariables = [];
@@ -106,7 +98,6 @@ const snowsportsDb = async () => {
       bind: cityInsertQueryVariables,
     });
 
-    /*                         s                      */
     let storeInsertQuery =
       "INSERT INTO store (store_name, store_description, store_adress, store_zipcode, store_fk_city_id, store_createdBy_fk_user_id) VALUES ";
 
@@ -149,18 +140,18 @@ const snowsportsDb = async () => {
       }
       reviewInsertQuery += string + `)`;
       if (index < array.length - 1) reviewInsertQuery += ",";
-      // prettier-ignore
+
       const variables = [
-        review.review_title, 
-        review.review_description, 
+        review.review_title,
+        review.review_description,
         review.review_rating,
         review.fk_user_id,
         review.fk_store_id,
-        ];
-      // prettier-ignore
+      ];
+
       reviewInsertQueryVariables = [
-          ...reviewInsertQueryVariables, 
-          ...variables
+        ...reviewInsertQueryVariables,
+        ...variables,
       ];
     });
     reviewInsertQuery += `;`;
@@ -169,13 +160,10 @@ const snowsportsDb = async () => {
       bind: reviewInsertQueryVariables,
     });
 
-    //console.log(usersRes);
     console.log("Database successfully populated with data...");
   } catch (error) {
-    // Log eny eventual errors to Terminal
     console.error(error);
   } finally {
-    // End Node process
     process.exit(0);
   }
 };

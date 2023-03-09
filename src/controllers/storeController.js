@@ -21,13 +21,13 @@ exports.getAllStores = async (req, res) => {
         bind: { limit: limit, offset: offset },
       }
     );
-    console.log(store);
     if (store.length < 0) {
       throw new NotFoundError("sorry, we can't find any stores😢");
     }
     return res.json(store);
   } else {
-    const formattedCity = city.trim();
+    const formattedCity =
+      city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
 
     const [results] = await sequelize.query(
       `SELECT *
@@ -40,7 +40,7 @@ exports.getAllStores = async (req, res) => {
         bind: { city: formattedCity, limit: limit, offset: offset },
       }
     );
-    if (store.length < 0) {
+    if (results.length < 0) {
       throw new NotFoundError(
         "sorry, we can't find any stores listed in that city😢"
       );
@@ -66,9 +66,9 @@ exports.getStoreById = async (req, res) => {
     }
   );
 
-  if (!store) {
+  if (!store.store_id) {
     throw new NotFoundError(
-      "We could not find the store you are looking for.😢"
+      "We could'nt find the store you are looking for.😢"
     );
   }
   const reviews = await sequelize.query(
@@ -107,24 +107,17 @@ exports.deleteStore = async (req, res) => {
     }
   );
 
-  if (store.length <= 0)
-    throw new BadRequestError("Store does not exists");
+  if (store.length <= 0) throw new BadRequestError("Store does not exists");
 
   const userId = store[0].store_createdBy_fk_user_id;
 
   if (req.user.role == userRoles.ADMIN || req.user.userId == userId) {
-    await sequelize.query(
-      `DELETE FROM review WHERE fk_store_id = $storeId`,
-      {
-        bind: { storeId: storeId },
-      }
-    );
-    await sequelize.query(
-      `DELETE FROM store WHERE store_Id = $storeId`,
-      {
-        bind: { storeId: storeId },
-      }
-    );
+    await sequelize.query(`DELETE FROM review WHERE fk_store_id = $storeId`, {
+      bind: { storeId: storeId },
+    });
+    await sequelize.query(`DELETE FROM store WHERE store_Id = $storeId`, {
+      bind: { storeId: storeId },
+    });
     return res.sendStatus(204);
   } else {
     throw new UnauthorizedError(
@@ -227,9 +220,7 @@ exports.updateStoreById = async (req, res) => {
     !store_zipcode ||
     !store_fk_city_id
   ) {
-    throw new BadRequestError(
-      "You must enter values for each field."
-    );
+    throw new BadRequestError("You must enter values for each field.");
   }
 
   const store = await sequelize.query(
@@ -243,9 +234,8 @@ exports.updateStoreById = async (req, res) => {
     }
   );
 
-  if (store.length <= 0)
-    throw new UnauthorizedError("Store does not exist.");
-  console.log(store);
+  if (store.length <= 0) throw new UnauthorizedError("Store does not exist.");
+
   if (
     userRole == userRoles.ADMIN ||
     userId == store[0].store_createdBy_fk_user_id
