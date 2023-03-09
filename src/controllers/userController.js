@@ -26,16 +26,9 @@ exports.getUserById = async (req, res) => {
     throw new BadRequestError("User ID must be a number.");
   }
 
-  if (
-    userId != req.user?.userId &&
-    req.user.role !== userRoles.ADMIN
-  ) {
-    throw new UnauthorizedError("Unauthorized Access");
-  }
-
   const [user] = await sequelize.query(
     `
-  SELECT * FROM user u
+  SELECT username, email FROM user u
   WHERE user_id = $userId
   `,
     {
@@ -87,18 +80,6 @@ exports.updateUserById = async (req, res) => {
     req.user.role !== userRole.ADMIN
   ) {
     throw new UnauthorizedError("Unauthorized Access");
-  }
-
-  if (username == "" || email == "" || password == "") {
-    throw new BadRequestError(
-      "Input fields cannot be empty! Try again."
-    );
-  }
-
-  if (!email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
-    throw new BadRequestError(
-      "User email must be an email! Try again."
-    );
   }
 
   const user = await sequelize.query(
