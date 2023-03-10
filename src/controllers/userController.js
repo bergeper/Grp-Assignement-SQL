@@ -128,7 +128,7 @@ exports.deleteUserById = async (req, res) => {
       }
     );
 
-    if (userId.length <= 0 ) throw new BadRequestError("User does not exists");
+    if (userId.length <= 0) throw new BadRequestError("User does not exists");
 
     await sequelize.query(`DELETE FROM user WHERE user_id = $userId;`, {
       bind: { userId: userId },

@@ -45,8 +45,8 @@ exports.reviewSchema = [
   body("review_description")
     .not()
     .isEmpty()
-    .isLength({ min: 3, max: 500 })
-    .withMessage("You must provide a description"),
+    .isLength({ min: 0, max: 500 })
+    .withMessage("You must provide a description with max 500 chars"),
   body("review_rating")
     .isInt({ min: 1, max: 5 })
     .withMessage("You must provide a number between 1 and 5."),

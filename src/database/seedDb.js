@@ -46,7 +46,7 @@ const snowsportsDb = async () => {
     CREATE TABLE IF NOT EXISTS review (
       review_id INTEGER PRIMARY KEY AUTOINCREMENT,
       review_title TEXT NOT NULL,
-      review_description TEXT NOT NULL,
+      review_description TEXT,
       review_rating INTEGER NOT NULL,
       fk_user_id INTEGER NOT NULL,
       fk_store_id INTEGER NOT NULL,
